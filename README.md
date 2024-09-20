@@ -46,23 +46,23 @@ Both engines sit inside the browser. Using Javascript code we can provide them w
 When we write <script src="./app.js"/> inside the body tag, it ensures that DOM elements have already been created when this javascript is run.
 
 
-# Building dynamic web applications means manipulating the DOM.
+## Building dynamic web applications means manipulating the DOM.
 
 Manipulating the DOM is an expensive task.
 We need to minimize the work at manipulating the DOM.
      
-# IMPERATIVE VS DECLARATIVE PROGRAMMING
+## IMPERATIVE VS DECLARATIVE PROGRAMMING
 
 1. IMPERATIVE PROGRAMMING: Style of programming in which we describe how a program should do its task:
 For e.g how a dog should tie its shoes
 
 2. DECLARATIVE PROGRAMMING: Style of programming in which we declare what we want the program to accomplish without describing how.
 
-DECLARATIVE PROGRAMMING SYSTEM IS BUILT ON TOP OF IMPERATIVE PROGRAMMING.
+**DECLARATIVE PROGRAMMING SYSTEM IS BUILT ON TOP OF IMPERATIVE PROGRAMMING.**
 
-# We rely on programming done by other developers
+## We rely on programming done by other developers
 
-In simple words, React Code is imperative programming i.e it has the code with instructions as to how to update the DOM.
+In simple words, **React Code is imperative programming** i.e it has the code with instructions as to how to update the DOM.
 
 Declarative programming is what we as developers, do. We just need to write code for our business logic and react code takes care of providing a set of instructions to the browsers as to how to render it. 
 
