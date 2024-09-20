@@ -6,6 +6,7 @@ https://github.com/facebook/react
 
 React is other people's javascript code. Its not a blackbox.
 DOM and Declarative Programming
+```html
 <section>
 <ul>
 <li>Section 1</li>
@@ -13,6 +14,7 @@ DOM and Declarative Programming
 <li>Section 3</li>
 </ul>
 </section>
+```
 
 All of these elements form part of a tree.
 When the browser reads in the text file(html file), it renders objects in computer memory in form of a tree. These objects have references to one another. It is a tree of objects. This tree models what was there in the document. This is known as the document object model (DOM).
