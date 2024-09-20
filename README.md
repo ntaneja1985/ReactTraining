@@ -60,3 +60,9 @@ DECLARATIVE PROGRAMMING SYSTEM IS BUILT ON TOP OF IMPERATIVE PROGRAMMING.
 
 We rely on programming done by other developers
 
+In simple words, React Code is imperative programming i.e it has the code with instructions as to how to update the DOM.
+
+Declarative programming is what we as developers, do. We just need to write code for our business logic and react code takes care of providing a set of instructions to the browsers as to how to render it. 
+
+It makes our life easier so that we can focus on what our application should do rather than bothering about how it will do it.
+
