@@ -1,39 +1,32 @@
-// const listElement = document.getElementById("list");
-// const newListItem = document.createElement("li");
-// newListItem.textContent = "Item 3";
-// //Browser API
-// setTimeout(()=>{
-//     listElement.appendChild(newListItem);
-// },3000)
-
-//Example of imperative programming
-//we tell the browser how to update the DOM via explicit instructions
-//For complex apps this is tough
-
-// function setCount() {
-//     const countElement = document.getElementById("count");
-//     count =  Number(countElement.textContent);
-//     count = count + 1;
-//     countElement.textContent = count;
-// }
+let counter = {name: 'Counter'};
+let counterValue = 1;
 
 
-
-const CountApp = {
-    getCount: () =>{
-        const countElement = document.getElementById("count");
-        return Number(countElement.textContent);
-    },
-    setCount: (val) =>{
-        const countElement = document.getElementById("count");
-        countElement.textContent = val;
-    }
+//Pure function
+//Has no side effects
+function pureCounter(ctr,value)
+{
+    return `${ctr.name} ${value}`;
 }
 
-//Example of Declarative Programming
-//Here we are not really bothered about the DOM. We just get the value and set the value
-function setCount() {
-    let count = CountApp.getCount();
-    count = count + 1;
-    CountApp.setCount(count);
+console.log(pureCounter(counter,counterValue));
+console.log(pureCounter(counter,counterValue+1));
+console.log(pureCounter(counter,counterValue));
+
+//Here we have mutated the ctr object
+//ctr object is passed by reference so it results in a different value each time
+//Here we are updating the global value rather than the value passed to me
+//Here for the same set of inputs we get different outputs
+//Impure functions are buggy, difficult to maintain code
+//React has features to ensure our function components are pure
+function impureCounter(ctr,value)
+{
+    ctr.name = ctr.name + ' Nishant';
+    counterValue = counterValue + 1;
+    return `${ctr.name} ${value}`;
 }
+console.log('----')
+console.log(impureCounter(counter,counterValue));
+console.log(impureCounter(counter,counterValue+1));
+console.log(impureCounter(counter,counterValue));
+console.log(counter)
