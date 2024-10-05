@@ -1,32 +1,52 @@
-let counter = {name: 'Counter'};
-let counterValue = 1;
+const rootNode = document.getElementById("app");
+const root = ReactDOM.createRoot(rootNode);
+root.render(React.createElement(App));
+let counterName = "One";
 
-
-//Pure function
-//Has no side effects
-function pureCounter(ctr,value)
+function App()
 {
-    return `${ctr.name} ${value}`;
+    const counterOne = <Counter name={counterName} />
+    const counterTwo = <Counter2 name={counterName} />
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            {counterName === "One" ? counterOne : counterTwo}
+        </section>
+    </section>
+    )
 }
 
-console.log(pureCounter(counter,counterValue));
-console.log(pureCounter(counter,counterValue+1));
-console.log(pureCounter(counter,counterValue));
-
-//Here we have mutated the ctr object
-//ctr object is passed by reference so it results in a different value each time
-//Here we are updating the global value rather than the value passed to me
-//Here for the same set of inputs we get different outputs
-//Impure functions are buggy, difficult to maintain code
-//React has features to ensure our function components are pure
-function impureCounter(ctr,value)
+function Counter({name})
 {
-    ctr.name = ctr.name + ' Nishant';
-    counterValue = counterValue + 1;
-    return `${ctr.name} ${value}`;
+    return (
+    <article>
+        <h2>Counter {name}</h2>
+        <p>You clicked 1 times</p>
+        <button className="button">
+            Click Me!
+        </button>
+    </article>
+    )
 }
-console.log('----')
-console.log(impureCounter(counter,counterValue));
-console.log(impureCounter(counter,counterValue+1));
-console.log(impureCounter(counter,counterValue));
-console.log(counter)
+
+function Counter2({name})
+{
+    return (
+        <> 
+    <article>
+        <h2>Counter {name}</h2>
+        <p>Clicked 1 time</p>
+        <button className="button">
+            Click Me!
+        </button>
+    </article>
+    </>
+    )
+}
+
+function rerender(){
+    console.log("Re-rendering")
+    counterName = "Two"
+    root.render(React.createElement(App));
+}

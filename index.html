@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Understanding React</title>
+    <title>JSX</title>
+    <style>
+        .button {
+            background-color: blue;
+            color: white;
+        }
+    </style>
 </head>
 <body>
-    <main id="app"></main>
-    <!-- <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script> -->
-    <script src="./scripts/react.development.js"></script>
-    <script src="./scripts/react-dom.development.js"></script>
-    <script src="app.js"></script> 
+<main id="app"></main>
+<p>
+    <button onclick="rerender()"> Re-Render</button>
+</p>
+<script src="./scripts/react.development.js"></script>
+<script src="./scripts/react-dom.development.js"></script>
+<script crossorigin src="http://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="app.js" type="text/jsx"></script>
 </body>
 </html>

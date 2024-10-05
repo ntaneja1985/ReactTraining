@@ -402,3 +402,88 @@ function updateFn()
     ```
     - React.createElement() is a function and we are passing an object as props to it. 
     - We can specify the attributes within that props object and React will automatically update the real DOM with the attributes that we have specified inside that object for that particular element
+  
+
+  # JSX
+
+ ***Markup and Tree Creation shorthand***
+ - In react we create lot of tree data structures
+ - In react the challenge was to how to write these trees easily
+ - But we also want to include some logic and javascript code while creating trees
+ - Transformation and Transpilation: Transforming (changing) the text of code written in one syntax and converting it to a different syntax that does the same thing.
+ - Sometimes a "transpiler" is referred to as "transformer"
+ - Makes the life of developers easier
+ - Markup is not part of javascript syntax
+ - Transpilation allows us to write the code in an easier way
+  
+# React Elements and JSX
+- Just a shortcut for creating and writing POJOs
+- JSX is an XML like syntax extension to ECMAScript without any defined semantics.
+- What does semantics mean? For e.g HTML elements need to have certain meanings(semantics). This means "ol" stands for ordered list, "a" stands for anchor tag and so forth
+- But JSX doesnot have any of these defined semantics. We can create our own semantics(or our own tags) like "specialTagByNishant"
+- JSX is not HTML inside javascript. It is a markup language with no defined semantics.
+- JSX is a generic way of writing tree data structures as part of a javascript file.
+- JSX is not even meant to run inside a browser. It is to be used by various transpilers to transform its tokens(or tags) into standard ECMAScript(or Javascript)
+- JSX is just shorthand to do our job faster
+- Writing trees is most easiest using markup
+```javascript
+// Using JSX to express UI components
+var dropdown  = <Dropdown>
+    A dropdown list
+    <Menu>
+      <MenuItem>Do Something</MenuItem>
+      <MenuItem>Do Something Fun!</MenuItem>
+      <MenuItem>Do Something Else</MenuItem>
+    </Menu>
+  </Dropdown>;
+
+  render(dropdown);
+```
+- Good thing is JSX is not a string but markup language
+- JSX stands for Javascript syntax extension or Javascript XML
+
+```javascript
+const rootNode = document.getElementById("app");
+const root = ReactDOM.createRoot(rootNode);
+root.render(React.createElement(App));
+
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter/>
+        </section>
+    </section>
+    )
+}
+
+function Counter()
+{
+    return (
+    <article>
+        <h2>Counter</h2>
+        <p>You clicked 1 times</p>
+        <button className="button">
+            Click Me!
+        </button>
+    </article>
+    )
+}
+```
+- Here, above, we have removed React.createElement() and written JSX.
+- As we can see it is simple to write and understand.
+- But browser will not understand it directly.
+- It will first transpile it to Javascript using Babel compiler and then only render it
+- Careful authored HTML is easier to read and maintain
+- Please note that div is not a container
+- React functions return only a single element
+- div element has no special meaning. It only represents its children.
+- div is an element of the last resort.
+- Deeper our DOM tree, slower is the performance of our page
+- Dont add too many layers to the DOM tree
+- Instead of div use React fragments like <></>
+- React fragment is not added to the real DOM
+
+
