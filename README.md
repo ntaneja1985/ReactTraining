@@ -486,4 +486,122 @@ function Counter()
 - Instead of div use React fragments like <></>
 - React fragment is not added to the real DOM
 
+# Fiber and Reconciliation
 
+### Root Creation and Render
+- All code in React begins with the definition of a root node
+  ```javascript
+    const root = ReactDOM.createRoot(rootNode);
+  ```
+- This initializes a tree data structure which will have children appended to it
+- Linked List is a simple data structure that creates a line of items that are linked to each other. It has a pointer to the next element. We have doubly linked list also. It is very light of memory. It is easy to traverse a linked list
+- In React we have Fiber Nodes and Fiber Trees
+***In addition to DOM Element Tree and React Element Tree, we have the Fiber Tree***
+- Fiber Tree are simple objects used by React Tree to store information and determine what work needs to be done
+- React Element Tree is disposed of and re-rendered but React Fiber Tree is not destroyed or recreated, rather it is updated
+- React Fiber Tree is used to store state
+- React Fiber Tree can be used as a middleman between DOM Tree and React Tree. It can be used to determine what needs to be rendered on the actual DOM tree and best way to make them.
+- Fiber Tree uses Linked Lists and is very lightweight
+- Reason why we use 3 trees is to make React as lightweight as possible.
+- Fiber Tree is essentially a copy of the React Element tree at a particular point of time
+- In react fiber tree we have updateContainer() method
+- Basically this tree structure is defined using LinkedLists
+- All features of React are built on top of Fiber Tree
+- For all of our DOM elements, React adds a reference to the Fiber Nodes
+- Fiber Nodes also have references to the DOM
+- Tree Reconciliation and Tree Edit Distance Problem: Reconciliation means comparing 2 items to find difference between them
+- We compare 2 trees or portion of trees and finding the steps to make them match.
+- Tree Edit Distance Problem: What is the algorithm to find the smallest number of steps to change one tree to match another?
+- Finding the number of steps is important as we want to minimize the number of steps to convert React Element Tree to DOM Tree.
+- Methodology(Algorithm) to find minimum of steps should also be very efficient.
+- We only define our React Element tree with JSX, React does all the above work.
+- Fiber tree matches the current state of the DOM Tree, React Element tree tells us what the tree should look like(declarative)
+- Think of Fiber tree as an area where we can do rough work. It is like a small model of the DOM tree where we can try our changes before we make changes to real DOM tree.
+- When React Element Tree changes, the portion of tree that has changed is first rendered on the Fiber Tree
+- When the React Element Tree changes, React attaches the changes to the Fiber tree as a work in progress branch or alternate branch.
+- Then when the work is done, the alternate or work in progress branch becomes the main branch and the earlier main branch becomes the work in progress or alternate branch.
+- Fiber tree is basically a combination of the real DOM tree and what we want the DOM tree to look like as represented by the React Element tree.
+- How does React make the decision to go from React Element Tree to real DOM tree --> This is done through Reconciliation and Work: What needs to be done and how?
+- Fiber tree contains pieces of the re-rendered DOM tree.
+- React implements a reconciliation algorithm.
+- This reconciliation algorithm looks at the current tree and the work in progress tree and figures out the steps that are needed to take on the "Real" tree.
+- React makes a plan of what to do using the Fiber tree and executes that plan using the real DOM tree and then that is displayed on our screen.
+- Fiber tree is not destroyed so it is used for lot of other fundamentally important things within React.
+- Fiber tree is end of the day used to carry out reconciliation between the DOM tree and React Element tree.
+
+# Execution Contexts and Pausing Works
+- Execution Context and Event Loop
+- All javascript code is run inside an execution context. There is the Global function which runs the user function
+- In the browser, there is a queue of events as well. 
+- Javascript Engine which resides inside the browser contains the Execution Stack and Queue.
+- Javascript brings the code from the queue when the call stack is empty.
+- React doesnot interrupt the code that is being executed.
+- React keeps track of the code that is being executed.
+- Fiber and Custom Execution Context
+- React has its own execution contexts like BatchedContext, RenderContext, CommitContext.
+- React runs its code inside its own execution context.
+- React tells the browser that when it done executing other code, it can execute code provided by React
+- React can pause its work and splits it work and tell the browser accordingly so that the rendering process is very efficient.
+- What happens inside a Fiber tree doesnot happen all at once.
+
+# Units of Work and the Work Loop
+- Whatever work React needs to do it needs to pause, start, continue and basically allow the browser to continue doing its work. 
+- End of the day React has to get its work done.
+- React looks at the fiber tree and determines what needs to be done. For e.g do we need to add an element or remove an element. All of this is known as unit of work.
+- React does all of this inside a work loop
+- Equality on Javascript: This is a tricky concept.
+- React only does work when something changed.
+- Object.is(a,b) --> Checks if a and b are equal (by reference)
+
+# Beginning, Completing, Bailing Out and Pausing Work
+- Organizing Work
+- Memoization: Store the result of a computation so that we dont have to repeat the computation itself.
+- memoized Props means the values that were passed to the function
+- if there is no work to be done we can do bailing out. React is trying to be efficient.
+- In React Unit of Work, we can begin, bail out and complete our unit of work.
+- React organizes work well so it has places where other things can be done.
+- Inside the work, it can choose not to execute the work till certain things happen on the browser.
+- React helps the app to appear fast in the browser.
+- React moves through the fiber tree and does work using the nodes of the fiber tree.
+  
+
+  # Lanes and Priority
+  - Lanes are how react prioritizes the work
+  - We can order the work using Lanes
+  - We have functions like getHighestPriorityLanes
+  - Also we have offscreen lanes--> means lowest priority work
+  - React ensures our application renders to the user as quickly as possible.
+  
+  # React DOM and Rendering
+  - We have 3 trees: React Element Tree, Fiber Tree and real DOM tree
+  - React does work to match the Fiber Tree to the React Element Tree and then finally updates the DOM tree based on the Fiber tree.
+  - Each step of the process called a unit of work is done at different points of time. 
+  - Rendering essentially means reconciling the DOM tree and the Fiber tree.
+  
+  # Mounting, Updating and Unmounting in React
+  - Hanging and removing
+  - Mounting a component: In Fiber tree each component is a reference inside of a Fiber Node. The component itself will return React element objects which are converted into Fiber Nodes.
+  - Reconciliation process is completed when the act of adding the DOM Nodes to the real DOM tree based on a particular component is known as mounting of a component. Basically the DOM nodes have been attached based on what the component should look like
+  - Later Fiber tree may get a work in progress update where the component is updated
+  - Component may be removed from the Fiber Tree and corresponding DOM nodes are removed so the component is unmounted.
+  - Unmounting a component doesnot necessarily mean the component is removed from the DOM tree. It depends on what the Fiber tree looks like. It also depends on the reconciliation algorithm.
+  - If the Fiber Node has a reference to the real DOM element, it means the component has been mounted to the real DOM tree.
+  ***This is also known as React Lifecycle***
+  - React allows us to carry our own code at different points in the lifecycle.
+  - React lifecycle methods are hooks that allow you to run code at specific  points in a component's life. Here's a quick rundown:
+
+    1. Mounting: When a component is being inserted into the DOM.
+    - constructor(): Called before anything else. Great for setting initial state or binding methods.
+    - componentDidMount(): Invoked immediately after a component is inserted. Ideal for fetching data or integrating with other libraries.
+
+    2. Updating: When a component is being re-rendered due to changes in state or props.
+    - shouldComponentUpdate(): Lets React know if re-rendering is necessary. Often used for performance optimization.
+    - componentDidUpdate(): Called after updates. Useful for making network requests or updating the DOM based on the previous props or state.
+
+    3. Unmounting: When a component is being removed from the DOM.
+    - componentWillUnmount(): Used to clean up resources like event listeners or timers.
+
+    4. Error Handling: Invoked when there's an error during rendering, in a lifecycle method, or in a constructor.
+    -   componentDidCatch(): Allows you to handle errors gracefully.
+
+***And now with Hooks, you get functions like useEffect() which combines lifecycle stages into a single API.***
