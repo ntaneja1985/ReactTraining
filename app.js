@@ -21,13 +21,31 @@ function App()
 
 function Counter({name})
 {
+    const clickHandler = (event) =>{
+        console.log("React handled the event");
+        console.log(event)
+    }
+
+    const parentClickHandler = (event) =>{
+        console.log("Parent was clicked too")
+    }
+
+    const linkClickHandler = () =>{
+        
+        event.preventDefault();
+        event.stopPropagation();
+        console.log("Going to site")
+    }
     return (
-    <article>
+    <article onClick = {parentClickHandler}>
         <h2>Counter {name}</h2>
         <p>You clicked 1 times</p>
-        <button className="button">
+        <button className="button" onClick = {clickHandler}>
             Click Me!
         </button>
+        <p>
+            <a href="http://google.com" target = "_blank" onClick = {linkClickHandler}>Google</a>
+        </p>
     </article>
     )
 }
@@ -52,3 +70,14 @@ function rerender(){
     counterName = "Two"
     root.render(React.createElement(App));
 }
+
+// rootNode.addEventListener("click",function(event){
+
+//     if(event.target.tagName === "BUTTON")
+//     {
+//         console.log("Button was clicked")
+//     }
+//     else {
+//         console.log("Didnot click on button")
+//     }
+// })

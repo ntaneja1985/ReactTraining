@@ -605,3 +605,37 @@ function Counter()
     -   componentDidCatch(): Allows you to handle errors gracefully.
 
 ***And now with Hooks, you get functions like useEffect() which combines lifecycle stages into a single API.***
+
+# Events
+- We need to deal with Events in React also
+- DOM Events
+- In javascript we add Event Listeners and define handlers like onClick() event handler(this is how browser implements dealing with user interaction)
+- We can have multiple listeners
+- Browser does something called event bubbling
+- Handling the event on the innermost element and then moving up through the ancestors to handle the event.
+- Lets say we have a ul --> li -->a-->a-->button
+- If a has a click event then it is executed,  if li has a click event also, it is also executed, if ul has a click event, that is also executed
+- Event Capturing: Handling the event on the outermost element, and then move down through the descendants to handle the same event
+- so ul handles click first, then li and then a
+- Capturing is rarely used.
+- Built in way is using event bubbling.
+- Event Propagation: Transmitting something in a particular direction through a medium. Basically it means event bubbling and event capturing. Moving the event through the DOM Nodes.
+- Event Delegation: Assigning an event handler to an ancestor node in the tree.
+- Lot of listeners are inefficient
+- For large DOM trees, we can put a single listener on a single root element in hope that that element will receive the event.
+- Instead of having multiple handlers for different buttons, react helps us. Rather than writing code for each button, React helps us by using React Event Objects
+
+# How does React help us to work with Events provided by the browser
+
+- React Event Objects
+- React's approach to handling events is to use event delegation and then let us specify the individual targets on the events we want to handle
+- React delegates all the events to the root of our DOM
+- There is a listener at the root
+- Event that was passed was not a DOM event
+- It passes a synthentic base event which is a javascript object that react created. It has a target which is the button
+- This synthentic base event is wrapper over the DOM(native) events and is also referred to as the React Event Object
+
+## Synthentic Event Properties and Methods
+- event.preventDefault(); --> This prevents the default behaviour
+- event.stopPropagation(); --> Stops the bubbling of events
+- Events and DOM updates are related through state.
