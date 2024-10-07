@@ -639,3 +639,23 @@ function Counter()
 - event.preventDefault(); --> This prevents the default behaviour
 - event.stopPropagation(); --> Stops the bubbling of events
 - Events and DOM updates are related through state.
+  
+# React State
+- State: In the context of software, the data at any given time that describes the current state or condition of the system
+- Finite State Machine: A model of a process that can be in a limited number of states. 
+- It models the states, the inputs and the transitions between states in response to the inputs
+- Deterministic: A predictable process that in the context of state machine always gives the same output given the same inputs and state.
+- Pure functions help to make sure our state machine is deterministic and it remains consistent and predictable
+- User Interface reflects the state of the system
+- The underlying state machine must be deterministic, consistent and reliable.
+- Functions we use to change state must be pure.
+- User Interface is a function of state.
+- By giving the same state to our components should give us the same React Element Tree.
+## Reducers
+- Functional programming is a style of programming where we organize our code into pure functions. React borrows a lot of concepts from functional programming.
+- Our components are pure functions
+
+## Actions and State
+- Action is a description of what has occurred in an app and how state changes as a result
+- Action is a very neat way of what is going on in my application.
+- Anything that happens in our application is a sequence of actions
