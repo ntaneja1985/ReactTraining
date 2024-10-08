@@ -1,51 +1,70 @@
 const rootNode = document.getElementById("app");
 const root = ReactDOM.createRoot(rootNode);
 //root.render(React.createElement(App));
+let counterName = "One";
 console.log(root)
 root.render(<App/>);
-let counterName = "One";
+
 
 function App()
 {
-    const counterOne = <Counter name={counterName} />
-    const counterTwo = <Counter2 name={counterName} />
+    // const counterOne = <Counter name={counterName} />
+    // const counterTwo = <Counter2 name={counterName} />
     return (
     <section>
         <h1>Counters</h1>
         <section>
-            {counterName === "One" ? counterOne : counterTwo}
+            {/* {counterName === "One" ? counterOne : counterTwo} */}
+            <Counter name="One"/>
+            <Counter name="Two"/>
         </section>
     </section>
     )
 }
 
-function Counter({name})
+function Counter(props)
 {
-    const clickHandler = (event) =>{
-        console.log("React handled the event");
-        console.log(event)
-    }
+    // const clickHandler = (event) =>{
+    //     console.log("React handled the event");
+    //     console.log(event)
+    // }
 
-    const parentClickHandler = (event) =>{
-        console.log("Parent was clicked too")
-    }
+    // const parentClickHandler = (event) =>{
+    //     console.log("Parent was clicked too")
+    // }
 
-    const linkClickHandler = () =>{
+    // const linkClickHandler = () =>{
         
-        event.preventDefault();
-        event.stopPropagation();
-        console.log("Going to site")
-    }
+    //     event.preventDefault();
+    //     event.stopPropagation();
+    //     console.log("Going to site")
+    // }
+    // const [state, dispatch] = React.useReducer((state,action)=>{
+    //     switch(action.type)
+    //     {
+    //        case 'Increment': return {...state,clicks:state.clicks+1} 
+    //        default:
+    //         throw new Error();
+    //     }
+    // },{clicks:0})
+    const [numOfClicks,setNumOfClicks] = React.useState(0);
+    const [myName,setMyName] = React.useState("Nishant");
+    const [state,dispatch] = React.useReducer(()=>{},"Taneja");
+
     return (
-    <article onClick = {parentClickHandler}>
-        <h2>Counter {name}</h2>
-        <p>You clicked 1 times</p>
-        <button className="button" onClick = {clickHandler}>
+    // <article onClick = {parentClickHandler}>
+    
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicks} times</p>
+        <button onClick={()=>{
+            setNumOfClicks(numOfClicks + 1)
+        }} className="button" >
             Click Me!
         </button>
-        <p>
+        {/* <p>
             <a href="http://google.com" target = "_blank" onClick = {linkClickHandler}>Google</a>
-        </p>
+        </p> */}
     </article>
     )
 }
@@ -65,11 +84,11 @@ function Counter2({name})
     )
 }
 
-function rerender(){
-    console.log("Re-rendering")
-    counterName = "Two"
-    root.render(React.createElement(App));
-}
+// function rerender(){
+//     console.log("Re-rendering")
+//     counterName = "Two"
+//     root.render(React.createElement(App));
+// }
 
 // rootNode.addEventListener("click",function(event){
 

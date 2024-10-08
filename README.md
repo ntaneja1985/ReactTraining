@@ -659,3 +659,158 @@ function Counter()
 - Action is a description of what has occurred in an app and how state changes as a result
 - Action is a very neat way of what is going on in my application.
 - Anything that happens in our application is a sequence of actions
+
+
+# Hooks and State
+- Fiber tree is a good place to store state since it stays around
+- Hooks is like attaching something to the tree
+- Hook is attached to a branch of the tree
+- State is stored inside hooks
+- Hooks are directly connected to the fiber tree
+- They are hanging off the nodes
+- Each fiber node has lot of different properties and one of them is memoizedState. State ends up being a javascript object called a hook
+- Hook is a javascript object
+- Each fiber node can have a hook attached it and each hook can have another hook attached to it. These hooks are stored inside a linkedList. Hooks are lightweight data structure.
+- These hooks are attached to the node of the tree
+- Queue: FIFO data structure
+- Each fiber node also has an updateQueue
+- Each hook has state and queues
+- This means a hook can have a list of items that can lined up and then we can flush the queue (Flushing means empty the data structure of its data and deal with its data)
+***React can batch updates***
+- Batching is processing multiple tasks as a single group. We may request the state to be updated in multiple hooks within our component. 
+- React can choose to update all those hooks as one process rather than process each hook one at a time
+- When state changes, UI should change
+- What does react do? It updates the DOM tree based on React Element Tree defined inside the component with the Fiber Tree in-between
+- So if the state changes, do we ask React to update each time ?
+- We know that the tree is an output of state. So if the state changes, then the tree atleast should be checked to see if it should change or not
+- We only need to re-render that piece of the tree where the state has changed.
+- So if state in the hook attached to the list component changes, then list component should be re-rendered. Similarly if the state attached to the Counter component changes, then counter component should be re-rendered or its tree should be updated.
+- If we change the state programmatically, react automatically knows that the state has changes so it should re-render the tree, in other words our function components should be executed again to see if the final output is different.
+  
+# useReducer Hook
+- Most basic hook for managing state
+- Dispatch: Sending the action to the reducer. Action has happened so reducing function should be called to get the new state.
+- useReducer hook takes 2 arguments: one is the reducing function and other is the initial state. It returns the reference to the memoized state inside the hook and a reference to the dispatch function. 
+- const [state, dispatch] = React.useReducer(()=>{},{clicks:0})
+- Here we use array destructuring to get the current state inside the hook and the dispatch function
+- If we analyze useReducer, we can see that our component Counter has a hook attached to it. This hook stores the state and has a reference to the method dispatch
+- We can then use this dispatch method to call the reducer
+- The reducer in turn changes the state which is stored as memoized state in the fiber node
+- If the state changes, then it will force the Fiber Tree to re-render which will force the Real DOM to change as well.
+
+
+```javascript
+
+//use the Counter component
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name="One"/>
+        </section>
+    </section>
+    )
+}
+
+function Counter(props)
+{
+    const [state, dispatch] = React.useReducer((state,action)=>{
+        switch(action.type)
+        {
+            //state changes which forces component to re-render
+           case 'Increment': return {...state,clicks:state.clicks+1} 
+           default:
+            throw new Error();
+        }
+    },{clicks:0})
+    return (    
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {state.clicks} times</p>
+        <button onClick={()=>{
+            dispatch({type:'Increment'})
+        }} className="button" >
+            Click Me!
+        </button>
+    </article>
+    )
+}
+
+```
+
+# useState hook
+- Commonly used hook in React
+- useState() is a specialized version of useReducer()
+- Main difference with useReducer() is that we dont really pass a reducer function
+- We just pass the initial value. There is a built in reducer function for useState
+- It is called a basicStateReducer
+- This basicStateReducer looks at our action and sets that to the state
+- state itself is the value of the action
+- useState returns an array with two elements: the current state value (count in this case) and a function to update it (setCount).
+- You can use the setCount function to update the state, and React will re-render the component with the new state value.
+- Here setNumOfClicks is really a dispatch function
+- useState is a wrapper for useReducer
+
+```javascript
+//use the Counter component
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name="One"/>
+        </section>
+    </section>
+    )
+}
+
+function Counter(props)
+{
+    const [numOfClicks,setNumOfClicks] = React.useState(0);
+
+    return (  
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicks} times</p>
+        <button onClick={()=>{
+            setNumOfClicks(numOfClicks + 1)
+        }} className="button" >
+            Click Me!
+        </button>
+    </article>
+    )
+}
+
+```
+
+***What if we now have 2 counters instead of one like this***
+
+```javascript
+//use the Counter component
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name="One"/>
+            <Counter name="Two"/>
+        </section>
+    </section>
+    )
+}
+
+```
+- Note that now there will be 2 branches of the fiber tree one for Counter 1 and another for Counter 2
+- Each branch will have its own hooks attached it to the node of the fiber tree with each counter being its own node. So each one will keep track of its own state
+- Each of the hooks will store their state separately.
+- Changing the state inside the hook within one particular fiber tree will cause that branch to trigger re-render of the DOM and the other branch will remain unaffected.
+- Which effectively means that each of the counters one and two will manage their own state without one overriding the other.
+- Updating counter 1 should not trigger update of counter 2 component
+- Undirectional data flow: Data can only move in one direction, in case of react downwards
+- Parent is always calling the child
+- Parent can give the child a reference as to how to update the parent data
+- We use JSX to generate a React Element Tree which in turn generates a React Fiber tree which holds a linked list of hooks and ultimately thanks to reconciliation causes the DOM tree to be updated.
