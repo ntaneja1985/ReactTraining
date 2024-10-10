@@ -814,3 +814,568 @@ function App()
 - Parent is always calling the child
 - Parent can give the child a reference as to how to update the parent data
 - We use JSX to generate a React Element Tree which in turn generates a React Fiber tree which holds a linked list of hooks and ultimately thanks to reconciliation causes the DOM tree to be updated.
+
+# Rules of Hooks
+- Lets assume we have a functional component and it has various hooks inside it
+  ```JavaScript
+    function List(props)
+    {
+        useState(...)
+        useReducer(...)
+        useState(...)
+    }
+  ```
+- When react is executing a component, it is also calling all the hooks inside it.
+- These hooks are in the form of a linked list. For e.g above, the first item in linked list will be useState() followed by useReducer() followed by useState()
+- React will execute hook 1 then move to the next hook and so on
+- But there are some rules to using hooks
+
+### Rules of using Hooks
+- We can only call hooks from a component
+- We can only use a hook inside a functional component
+- hooks are objects attached to the fiber tree node created by our component
+- It would not make sense to call them anywhere else
+- You can only call hooks at the top level in your component and not inside a condition or loops
+- To understand this look at the following code:
+
+```JavaScript
+function List(props)
+    {
+        useState(...)
+        if(condition)
+        {
+            useReducer(...)
+        }
+        useState(...)
+    }
+
+
+```
+- React will run the functional component and execute the first hook(useState)
+- If state changes and the condition changes to false, react will skip call to useReducer()
+- It will directly go and execute useState()
+- Problem is hooks are stored as a linked list, so after the first useState() it will go to the next hook in line useReducer() and it will try to get the state there
+- This is wrong and can lead to many bugs, therefore we can use hooks only at the top level in the component and not inside loops
+- React gives error like this if we try to execute the above code: 
+  ***React has detected a change in the order of Hooks called by Counter. This will lead to bugs and errors if not fixed***
+
+  - Lets say we have a function to update state again and again inside the function
+  
+  ```javascript
+    const [numOfClicks,setNumOfClicks] = React.useState(0);
+    
+    function handleClickWrong(){
+        setNumOfClicks(numOfClicks + 1);
+        setNumOfClicks(numOfClicks + 1);
+        setNumOfClicks(numOfClicks + 1);
+    }
+
+    function handleClick(){
+        setNumOfClicks(n=>n+1);
+        setNumOfClicks(n=>n+1);
+        setNumOfClicks(n=>n+1);
+    }
+  ```
+
+  - In the above, due to closure functionality of javascript, the numOfClicks will always be passed and after the handleClickWrong() has finished executing the value of numOfClicks will be 1 only. This is cause the main functional component(Counter) has finished executing and value of numOfClicks is fixed to initial state which is 0
+  - So even if we call setNumOfClicks 3 times, the value of numOfClicks will be 1 only
+  - In the second case handleClick() function we use a function which has a property "n" defined in it. so setNumOfClick(n=>n+1) will pass updated value of n to the state (numOfClicks) each time it is updated
+  - If we execute handleClick() function 3 times, the value of n after execution of that function will be 3 so numOfClicks will be set to 3.
+  
+  ## Referential Equality
+  - Comparing 2 values to see if they are at the same location in memory.
+  - Shallow Equality: Comparing the properties of 2 values if see if they are all strictly equal. That means the same values for primitives, or the same memory location for the objects
+  - Shallow equality helps us to compare 2 objects by value of their primitive types. However if they have sub-objects they will no longer be equal
+  
+  ```javascript
+    const person1 = {
+    firstName: 'Nishant',
+    lastName: 'Taneja',
+    course: {
+        name: 'Understanding React'
+    }
+    }
+
+    const person2 = {
+    firstName: 'Nishant',
+    lastName: 'Taneja',
+    course: {
+        name: 'Understanding React'
+    }
+    }
+
+    function shallowEqual(objA, objB) {
+    if (objectIs(objA, objB)) {
+      return true;
+    }
+
+    if (typeof objA !== 'object' || objA === null || typeof objB !== 'object' || objB === null) {
+      return false;
+    }
+
+    var keysA = Object.keys(objA);
+    var keysB = Object.keys(objB);
+
+    if (keysA.length !== keysB.length) {
+      return false;
+    } // Test for A's keys different from B.
+
+
+    for (var i = 0; i < keysA.length; i++) {
+      var currentKey = keysA[i];
+
+      if (!hasOwnProperty.call(objB, currentKey) || !objectIs(objA[currentKey], objB[currentKey])) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  console.log(shallowEqual(person1,person2)) //Returns false due to subobject being there, make it a primitive type and it will return true
+
+  ```
+
+  # Immutable State
+  - Immutable means cannot be changed
+  - React does referential equality by default(means that it compares 2 objects by comparing their location in memory)
+  - By default props and state are compared referentially
+  
+  ```javascript
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+    
+    function handleClickWrong(){
+       numOfClicks.total = numOfClicks.total + 1;
+       setNumOfClicks(numOfClicks);
+    }
+
+    function handleClick(){
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
+    }
+
+  ```
+  - In the above code, the handleClicksWrong method doesnot lead to any change in state because state is compared referentially. So numOfClicks object is compared to numOfClicks object and since they reside in same location in memory, no state change is detected and hence nothing comes up on the UI
+  -  In the handleClick() method using the spread operator we create a new object and then set its property to the new Total
+  -  So when this new object is compared to one in memory, it is considered different and hence state change is triggered and UI is updated
+  -  Please note react internally uses referential comparer by default. 
+  -  We dont change the state, we create new copies of state and it keeps our function pure as well.
+  
+  # Adding side-effects using useEffect hook
+  - Pure function and side-effects: A pure function for the same input gives the same output and causes no side effects.
+  - A sideeffect is when the function changes something outside of itself
+  - Sometimes we need side-effects
+  - Side-effects are not really the problem, the problem is when they are caused. We should know for certain when a side-effect will take place. So if it happens after the function has finished execution, it would cause no problems, so while executing that program would have no issues. React implements this through effects
+  - React provides a safe way to cause side effects
+  - We can add our own effect using useEffect
+  - In useEffect function we can write code that executes something outside the context of our current component, for e.g the title of the page
+  - effect is just a javascript object just like a hook. It stores create() the function we pass it and it also has destroy, next and deps property
+  - Hook objects have a simple structure, they have a state and a queue
+  - effect object is stored on an update queue attached to the fiber node and hook references that effect object
+  - So each fiber node in addition to containing a linked list of hooks also contains a linked list of effects
+  - When React finishes executing a functional component and all its hooks, it goes on to execute all the effects in the linked list queue of effects
+  - An effect by itself should run as a result of the act of rendering itself not events or state
+  - effects are not about events
+  - effects are not about state
+  - effects are needed when we need to run something in response to a rendering process.
+  - This means to synchronize something outside's react's control.
+  - Please note when everything else is executed then only the useEffect hook is run
+  - This doesnot make useEffect dangerous
+  - But do we want the effect to be run everytime the function runs ?
+  - What is something happened at a higher level component which caused our functional component to be re-rendered but the number of clicks didnot change? Do we still want to run the useEffect? Wouldnt it be unnecessary work?
+  - We should ideally run the effect only when the thing it depends on changed.
+
+```javascript
+React.useEffect(()=>{
+        console.log("In user effect");
+        document.title = "Clicks: " + numOfClicks.total;
+    })
+
+```
+
+# Dependencies
+- There may be times we dont want effect() function to run
+- We only want to run on specific conditions
+- effect is just a javascript object
+- useEffect expects we pass an array of values
+- If we dont pass an array it runs each time..this means there are no dependencies
+- if we pass an empty array it means there are empty dependencies, so useEffect only runs once and then doesnt run again
+- we can specify numOfClicks.total as dependencies property, so everytime numOfClicks changes, the useEffect re-runs
+```javascript
+React.useEffect(()=>{
+        console.log("In user effect");
+        document.title = "Clicks: " + numOfClicks.total;
+    },[numOfClicks.total])
+
+    React.useEffect(()=>{
+        console.log("In user effect");
+        document.title = "Clicks: " + numOfClicks.total;
+    },[numOfClicks])
+
+     function handleClick(){
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
+    }
+```
+
+- In the above example please note that react detects that the numOfClicks object has changed
+- Therefore, it runs the effect. React does referential compare of the objects. So if they reside in different locations in memory, then react determines that state has changed so it runs the effect
+- Note that each fiber notes has its own linked list of hooks and linked list of effects
+- All the effects are run only after all the hooks have run and there cannot be any side effects
+- We know that hooks are objects attached to fiber nodes
+- A fiber node also have props
+
+# Unmounting and effects
+- Effects are run after our function is complete in its execution
+- What happens when our component is removed from the tree?
+- Then we need to cleanup our effects
+- useEffect() hook returns a function that is passed to the destroy property of the hook.
+- So we can return a function with all the cleanup to be done for useEffect 
+
+```javascript
+ React.useEffect(()=>{
+        console.log("In user effect");
+        document.title = "Clicks: " + numOfClicks.total;
+        return () =>{
+            console.log("destroying component")
+        }
+    },[numOfClicks.total])
+
+
+```
+
+- Please note that that these cleanup functions are also run when the component re-renders and not just unmounted. When a component is re-rendered, react runs the cleanup of any previous effects from the previous render of the component.
+- To summarize, if we have a component with a hook for useEffect thats referencing an effect object, that effect object if we return from your effect function, we ll end up with the destroy function.
+- React will execute destroy on unmount or if the component is re-rendered, the destroy function of previous effects is also run
+- In the above code, the function we provide inside useEffect is to create and the function we return is to destroy. The function we give inside useEffect is run after our function has executed if there are no dependencies or if we specify dependencies. 
+- The function we return from is run on destroy of component or when it is unmounted.
+
+# Fetching Data
+- We need to fetch data from external sources in React
+- The act of fetching data is actually a side-effect in essence. Its something outside of our component that we want to go to.
+- When the component renders or changes its props, we may want to fetch different data.
+- Is useEffect() really the best place to fetch data from outside ?
+- React documentation recommends that if we use a react framework like Next.JS or Gatsby then that framework's data fetching mechanism will be a lot better than doing it inside an effect.
+- React has a specific order to do things
+- If a react component is executed multiple times or is re-rendered multiple times, then previous effects, cleanup functions are run, before the effects for the subsequent function are run.
+- Race condition: Two processes try to update the same data at the same time.
+```javascript
+async function fetchBio(person) {
+    const delay = person === "Bob" ? 9000:200;
+    return new Promise(resolve=>{
+        setTimeout(()=>{
+            resolve('This is '+person+' bio.');
+        },delay)
+    })
+}
+
+function App() {
+  const [person, setPerson] = React.useState('Alice');
+  const [bio, setBio] = React.useState(null);
+
+  React.useEffect(() => {
+    let ignore = false;
+    setBio(null);
+    fetchBio(person).then(result => {
+      if (!ignore) {
+        setBio(result);
+      }
+    });
+    return () => {
+        console.log("In cleanup function for "+person);
+      ignore = true;
+    };
+  }, [person]) ;
+
+```
+
+- In the above code, we demonstrate the order in which React manages effects.
+- As we can see when the fetchBio() function for "Bob" is run it will take lot of time compared to "Alice" and "Taylor"
+- Also the useEffect is dependent on person object
+- If the person object changed, the component is re-rendered. However what happens if the fetchBio() function for the previous effect is still running?
+- It can create race conditions
+- Therefore, whenever the react component changes or is re-rendered, all previous cleanup functions are run.
+- So if our component is on "Bob" and we change it to "Alice" or "Taylor", then immediately cleanup function for "Bob" is run and it sets ignore to true
+- So when the promise for "Bob" finally returns, nothing is done and setBio() function is not run and we avoid race-conditions
+- Also fetching data inside useEffect() may create network watefalls, one component may re-render which may cause other child components to re-render which may lead to multiple network request being made in each of their useEffect() functions
+- Therefore, react strongly recommends to use a framework's code to fetch data or use open source solutions like React Query
+
+# State closures
+- When a function remembers and uses an old value from outside of itself even though that value might have changed later
+
+```javascript
+function createCounter(incBy) {
+    let value = 0;
+    function increment(){
+        value += incBy;
+        console.log(value);
+    }
+    // stale closure
+    //const message = `Current value is ${value}`;
+    function log() {
+        const message = `Current value is ${value}`;
+        console.log(message);
+    }
+    return [increment,log];
+}
+
+const [increment,log] = createCounter(1);
+increment();
+increment();
+increment();
+log();
+
+```
+
+- In the above, when we call increment 3 times, "value" property is incremented 3 times, but the message property is only evaluated once, so message always prints 0
+- There is no code that suggests that message should be updated when value is updated. ***This is called a stale closure***
+- To fix it, evaluate message inside the log() method.
+
+### How to deal with stale closures in useEffect
+- The key to dealing with a stale closure is to make sure the effect is re-executed when its supposed to be.
+- We need to return a cleanup function from the useEffect() to clear the timer
+- Also we need to specify correct dependencies in the dependencies array of useEffect() to ensure the effect runs again when the dependencies change causing "message" to be re-evaluated.
+- When the Counter function or the functional component is called again and again we need to make sure that the previous call to that functional component or Counter function are cleaned up and ensure the effect is run again.
+- Be sure dependency list is correct
+
+```javascript
+function Counter(props)
+{
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+     //Stale closure
+    const message = `Number of clicks is ${numOfClicks.total}`   
+    React.useEffect(()=>{
+    
+        const id = setInterval(()=>{
+            console.log(message);
+        },2000);
+        return () => {
+            clearInterval(id)
+        }
+    },[])
+
+```
+
+***The dependencies array in useEffect is like your React component’s checklist.***
+ - It tells React when to re-run the effect. If any of the values in this array change between renders, the effect gets triggered.
+ - Please note that effect runs every time anything inside the dependencies array changes
+- If you omit the dependencies array, the effect runs after every render.
+- If you provide an empty array, the effect runs only once after the initial render.
+- The cleanup function in useEffect is essentially housekeeping for your component. It's where you clean up any side effects to prevent memory leaks or unexpected behavior when your component unmounts or before it re-renders.
+- Stale closures in useEffect occur when the effect relies on outdated state or props because the effect's closure doesn't capture the most recent values.
+***To deal with stale closures do the following: ***
+- Add Dependencies: Ensure that your dependencies array includes all the variables the effect depends on. Also this makes sure that the effect() function runs again when the dependencies change. This keeps the effect in sync with the most recent state or props.
+
+```javascript
+    useEffect(() => {
+  const timer = setInterval(() => {
+    console.log(count); // count will be up-to-date
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, [count]);
+
+```
+- Use Functional Updates: If your effect relies on state that might change frequently, use functional updates to access the latest state directly.
+
+```javascript
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+    const timer = setInterval(() => {
+    setCount(prevCount => prevCount + 1); // prevCount is always the latest
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+```
+- Use Refs: For cases where you need a stable reference to the latest state or props without triggering re-renders, useRef can be helpful.
+
+```javascript
+const countRef = useRef(count);
+
+useEffect(() => {
+  countRef.current = count;
+});
+
+useEffect(() => {
+  const timer = setInterval(() => {
+    console.log(countRef.current); // always the latest count
+  }, 1000);
+
+  return () => clearInterval(timer);
+}, []);
+
+
+```
+
+# What not to do in useEffect()
+- useEffect() was misused wildy when it was introduced in React
+- Effects are linke an escape hatch from the React paradigm and we might not need an effect() after all.
+- These effects let us step outside of React and synchronize our components with some other external system like non-React widget, network or browser DOM.
+- If there is no external system involved (for example if we want to update the component's state when some props or state changes), we may not need an effect.
+- Removing unnecessary effects will make code easier to follow, faster to run and less error prone.
+
+
+```javascript
+//Wrong usage of useEffect
+function Form() {
+  const [firstName, setFirstName] = useState('Taylor');
+  const [lastName, setLastName] = useState('Swift');
+
+  // 🔴 Avoid: redundant state and unnecessary Effect
+  const [fullName, setFullName] = useState('');
+  useEffect(() => {
+    setFullName(firstName + ' ' + lastName);
+  }, [firstName, lastName]);
+  // ...
+}
+
+
+```
+- In the above code, we dont need to use a useEffect(). This function will be executed again and again when the value of state variables(firstName and lastName) changes
+- We should also not be setting the state inside the useEffect coz it causes the function to be re-run. This is in-efficient
+- Please note that firstName and lastName are not just some piece of code that will sit around. Rather they are pieces of state.
+- If they change, the functional component will be re-rendered again and again. Anytime state changes, react creates a new work-in-progress branch.
+- 
+
+So we can simplify this as:
+
+```javascript
+function Form() {
+  const [firstName, setFirstName] = useState('Taylor');
+  const [lastName, setLastName] = useState('Swift');
+  // ✅ Good: calculated during rendering
+  const fullName = firstName + ' ' + lastName;
+  // ...
+}
+```
+- When something can be calculated from the existing props or state, don’t put it in state. Instead, calculate it during rendering. 
+- This makes your code faster (you avoid the extra “cascading” updates), simpler (you remove some code), and less error-prone (you avoid bugs caused by different state variables getting out of sync with each other).
+
+- Another example of wrong usage of useEffect is to reset all the state when the prop changes
+- What happens when props change, the function is re-run anyway, no need to use useEffect
+
+```javascript
+export default function ProfilePage({ userId }) {
+  const [comment, setComment] = useState('');
+
+  // 🔴 Avoid: Resetting state on prop change in an Effect
+  useEffect(() => {
+    setComment('');
+  }, [userId]);
+  // ...
+}
+
+```
+- However the component needs to be aware that it might need to re-run again in certain circumstances
+- We can tell React that each user’s profile is conceptually a different profile by giving it an explicit key. Split your component in two and pass a key attribute from the outer component to the inner one
+
+```javascript
+export default function ProfilePage({ userId }) {
+  return (
+    <Profile
+      userId={userId}
+      key={userId}
+    />
+  );
+}
+
+function Profile({ userId }) {
+  // ✅ This and any other state below will reset on key change automatically
+  const [comment, setComment] = useState('');
+  // ...
+}
+
+```
+
+***We should not be sending POST requests inside of useEffect()***
+- This Form component sends two kinds of POST requests. It sends an analytics event when it mounts. When you fill in the form and click the Submit button, it will send a POST request to the /api/register endpoint:
+
+```javascript
+function Form() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  // ✅ Good: This logic should run because the component was displayed
+  useEffect(() => {
+    post('/analytics/event', { eventName: 'visit_form' });
+  }, []);
+
+  // 🔴 Avoid: Event-specific logic inside an Effect
+  const [jsonToSubmit, setJsonToSubmit] = useState(null);
+  useEffect(() => {
+    if (jsonToSubmit !== null) {
+      post('/api/register', jsonToSubmit);
+    }
+  }, [jsonToSubmit]);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    setJsonToSubmit({ firstName, lastName });
+  }
+  // ...
+}
+
+```
+
+- The analytics POST request should remain in an Effect. This is because the reason to send the analytics event is that the form was displayed. (It would fire twice in development, but see here for how to deal with that.)
+- However, the /api/register POST request is not caused by the form being displayed. You only want to send the request at one specific moment in time: when the user presses the button. It should only ever happen on that particular interaction. Delete the second Effect and move that POST request into the event handler:
+
+```javascript
+function Form() {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+
+  // ✅ Good: This logic runs because the component was displayed
+  useEffect(() => {
+    post('/analytics/event', { eventName: 'visit_form' });
+  }, []);
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    // ✅ Good: Event-specific logic is in the event handler
+    post('/api/register', { firstName, lastName });
+  }
+  // ...
+}
+
+```
+
+- When you choose whether to put some logic into an event handler or an Effect, the main question you need to answer is what kind of logic it is from the user’s perspective. If this logic is caused by a particular interaction, keep it in the event handler. If it’s caused by the user seeing the component on the screen, keep it in the Effect.
+
+# useRef and ForwardRef
+- useState() is designed to trigger a re-render when the value changes.
+- We need a hook to store data but not to trigger a re-render
+- We have useRef and forwardRef-features that are useful but also dangerous
+- useRef stores a value but changing that value doesnot trigger re-render.
+```javascript
+function Counter(props)
+{
+    const numOfClicksRef = React.useRef({total:0}); 
+  
+    function handleClick(){
+        numOfClicksRef.current.total = numOfClicksRef.current.total + 1;
+        alert(`You have clicked ${numOfClicksRef.current.total} times. `)
+    }
+
+    return (
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicksRef.current.total} times</p>
+        <button onClick={handleClick} className="button" >
+            Click Me!
+        </button>
+    </article>
+    )
+}
+
+```
+- In the above, if we look at the alert, it works fine, we get the number of times, click button is clicked
+- But in the component UI, You have clicked 0 times will always remain
+- This is because a value change of useRef doesnot trigger a re-render of the component like a useState()
+- useRef assumes we dont need to re-render
+- useRef is a hook in React that provides a way to persist values between renders without causing re-renders when the value changes. It's like a “container” for a mutable value that can be updated but does not trigger a re-render when it does.
+- You can also use useRef to store any mutable value that you want to keep consistent across renders, such as a timer ID, a previous state value, or an instance of a third-party library.
+- It's perfect for cases when you want to access or manipulate a DOM element directly without causing the component to re-render
