@@ -1470,3 +1470,127 @@ const Counter = React.forwardRef(function Counter(props, buttonRef)
 
 
 # Custom Hooks
+- This is about reusing the logic behind how we use React hooks. These are custom hooks
+- There is no source code for how custom hooks are implemented
+- Custom hooks is just a name for the logic behind how the Fiber tree works and how React Rendering works
+
+```javascript
+
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name = "One"/>
+            <Counter name = "Two"/>
+        </section>
+    </section>
+    )
+}
+
+function useDocumentTitle(title)
+{
+    return React.useEffect(()=>{
+     const originalTitle = document.title;
+     document.title = title;
+     return () =>{
+        document.title = originalTitle;
+     }   
+    },[title])
+}
+
+function Counter(props)
+{
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+
+    const updateTitle = useDocumentTitle("Clicks " + numOfClicks.total)
+
+    function handleClick(){
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
+    }
+
+    return (
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicks.total } times</p>
+        <button onClick={handleClick} className="button">
+            Click Me!
+        </button>
+    </article>
+    )
+
+```
+- In the above code useDocumentTitle() is a custom hook, or just said simply any other function. We are just moving some code from within the functional component to outside the component for reusability.
+- So how does it work
+- React keeps track of the currentlyRenderingFiber Node.
+- It attaches the function(or custom hook) to the currently Rendering Fiber Node
+- Any other React hooks inside that custom function(or hook) are attached to the currentlyRendering Fiber Node and thats it.
+- It is executed any other way, the way other hooks inside the functional component are executed.
+- ***Custom hook is just any other function that uses a hook***
+
+- We can create a custom Counter function also like this
+- All we have done is move the useState() and useEffect() hooks to different custom functions and called them from inside the Counter functional component
+- Ultimately all of the hooks inside these custom functions are attached to the Counter component's fiber node tree
+- If we find ourselves repeating some logic across lot of components, we can create a new custom hook function and move that logic in there.
+  
+```javascript
+function App()
+{
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name = "One"/>
+            <Counter name = "Two"/>
+        </section>
+    </section>
+    )
+}
+
+function useDocumentTitle(title)
+{
+    return React.useEffect(()=>{
+     const originalTitle = document.title;
+     document.title = title;
+     return () =>{
+        document.title = originalTitle;
+     }   
+    },[title])
+}
+
+function useCounter(){
+    const [counterVal,setCounterVal] = React.useState({total:0}); 
+    const increment = () =>{
+        setCounterVal({...counterVal,total: counterVal.total + 1})
+    }
+    return [
+        counterVal,
+        increment
+    ]
+}
+
+function Counter(props)
+{
+    const [counter,incrementCounter] = useCounter();
+
+    const updateTitle = useDocumentTitle("Clicks " + counter.total)
+
+    function handleClick(){
+        incrementCounter();
+    }
+
+    return (
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {counter.total } times</p>
+        <button onClick={handleClick} className="button">
+            Click Me!
+        </button>
+    </article>
+    )
+}
+
+
+```
