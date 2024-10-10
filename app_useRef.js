@@ -6,52 +6,40 @@ console.log(root)
 root.render(<App/>);
 
 function App()
-{
-    const [swapCounter,setSwapCounter] = React.useState(false);
-    function handleClick(){
-        setSwapCounter(!swapCounter);
-    }
-
-    let counterOne = null;
-    if(!swapCounter)
-    {
-        counterOne = <Counter name="One"/>
-    }
+{ const ref = React.useRef();
+    React.useEffect(()=>{
+        ref.current.focus();
+    },[])
     return (
     <section>
         <h1>Counters</h1>
         <section>
-            {/* {counterName === "One" ? counterOne : counterTwo}
-            {counterOne}
-            {swapCounter ? <Counter name="Two"/>: null} */}
-            <Counter name = "One"/>
+            <Counter name = "One" ref= {ref}/>
+            <Counter name = "Two"/>
         </section>
-        {/* <button onClick={handleClick} className="button" >
-            SwapCounters
-        </button> */}
     </section>
     )
 }
 
-function Counter(props)
+const Counter = React.forwardRef(function Counter(props, buttonRef)
 {
-    const numOfClicksRef = React.useRef({total:0}); 
-  
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+
     function handleClick(){
-        numOfClicksRef.current.total = numOfClicksRef.current.total + 1;
-        alert(`You have clicked ${numOfClicksRef.current.total} times. `)
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
     }
 
     return (
         <article>
         <h2>Counter {props.name}</h2>
-        <p>You clicked {numOfClicksRef.current.total} times</p>
-        <button onClick={handleClick} className="button" >
+        <p>You clicked {numOfClicks.total } times</p>
+        <button onClick={handleClick} className="button" ref={buttonRef}>
             Click Me!
         </button>
     </article>
     )
-}
+})
 
 function Counter2({name})
 {

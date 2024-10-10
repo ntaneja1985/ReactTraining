@@ -1379,3 +1379,94 @@ function Counter(props)
 - useRef is a hook in React that provides a way to persist values between renders without causing re-renders when the value changes. It's like a “container” for a mutable value that can be updated but does not trigger a re-render when it does.
 - You can also use useRef to store any mutable value that you want to keep consistent across renders, such as a timer ID, a previous state value, or an instance of a third-party library.
 - It's perfect for cases when you want to access or manipulate a DOM element directly without causing the component to re-render
+
+# useRef and the DOM
+- useRef can also hold a reference to the real DOM element
+- Usually we prefer to do things in a declarative way and not manipulate the real DOM directly, there may be some cases where we may need to inject dynamism based on real DOM elements
+- This can be done by holding a reference to the DOM element using useRef
+
+```javascript
+function Counter(props)
+{
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+
+    const buttonRef = React.useRef();
+
+    React.useEffect(()=>{
+        buttonRef.current.focus();
+    },[])
+
+    function handleClick(){
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
+    }
+
+    return (
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicks.total } times</p>
+        <button onClick={handleClick} className="button" ref={buttonRef}>
+            Click Me!
+        </button>
+    </article>
+    )
+}
+
+
+```
+
+- In the above code, the useEffect() runs after all the hooks have run and real DOM has been generated.
+- Since we are using empty dependencies array it is run just once after the first render
+- Here we hold a reference to the actual button that is rendered on the DOM
+- We can then do a focus on the real DOM element (button)
+
+# forwardRef
+- forwardRef is a React function that allows you to pass a ref from a parent component to a child component, enabling direct access to the child's DOM elements or React elements. It's especially useful when you need to control a child's elements from the parent.
+- React provides a method useforwardRef which takes any functional component as input parameter and attaches along any refs sent from the parent.
+
+```javascript
+function App()
+{ const ref = React.useRef();
+    React.useEffect(()=>{
+        ref.current.focus();
+    },[])
+    return (
+    <section>
+        <h1>Counters</h1>
+        <section>
+            <Counter name = "One" ref= {ref}/>
+            <Counter name = "Two"/>
+        </section>
+    </section>
+    )
+}
+
+const Counter = React.forwardRef(function Counter(props, buttonRef)
+{
+    const [numOfClicks,setNumOfClicks] = React.useState({total:0});
+
+    function handleClick(){
+        let newNumOfClicks = {...numOfClicks,total:numOfClicks.total + 1};
+        setNumOfClicks(newNumOfClicks);
+    }
+
+    return (
+        <article>
+        <h2>Counter {props.name}</h2>
+        <p>You clicked {numOfClicks.total } times</p>
+        <button onClick={handleClick} className="button" ref={buttonRef}>
+            Click Me!
+        </button>
+    </article>
+    )
+})
+
+
+```
+- In the above ref is passed from the parent component (App)
+- child component Counter is an input parameter to function forwardRef
+- It takes the ref coming from the parent
+- Now inside the useEffect() inside the parent component we can control the child's components elements.
+
+
+# Custom Hooks
