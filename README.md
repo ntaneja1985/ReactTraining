@@ -1594,3 +1594,58 @@ function Counter(props)
 
 
 ```
+
+# Component Design
+- A section element in HTML represents a generic section of a document or an application. A section, is a thematic grouping of content, typically with a heading.
+- Examples of section would be chapters, the various tabbed pages in a tabbed dialog box, or the numbered sections of a thesis.
+
+```javascript
+
+/* Objects */ 
+class CounterObj {
+
+    constructor(name) {
+        this.name = name;
+        this.show = true;
+        this.total = 0;
+    }
+}
+
+const counterData = [
+    new CounterObj('A'),
+    new CounterObj('B'),
+    new CounterObj('C')
+]
+
+/* End Objects*/
+function CounterList(){
+    return (
+       <section>
+        {counterData.map((counter,index)=>(
+            <Counter name={counter.name}/> 
+        ))}
+       </section>
+    )
+}
+
+function CounterSummary(){
+    const summary = counterData.map((counter)=>{
+        return counter.name + '('+counter.total + ')';
+    }).join(', ');
+    return (
+        <p>
+           Summary: {summary}
+        </p>
+    )
+}
+
+```
+
+- In the above code, we can traverse over a list of objects using a map function of javascript
+- Also, if we want to show a summary of the total number of clicks in each component how do we display it in CounterSummary ?
+- counter total resides in a useState() hook inside the Counter Component fiber tree
+- whenever the state changes, the component is re-rendered and all of its children are re-render.
+- But lets say we have a top level component and we need to pass information about our state to that component, we cant do it that easily.
+- React uses a methodology for this called: Lifting State up
+
+# Lifting State up
