@@ -1649,3 +1649,136 @@ function CounterSummary(){
 - React uses a methodology for this called: Lifting State up
 
 # Lifting State up
+- Lets assume our requirements change. Now we need to do the following:
+- Hide/Show counters in the summary
+- Decrement and Increment a counter
+- Sort counters in the summary
+- Document title includes all counter values
+
+***Uncontrolled Component: A component whose state lives within and is controlled by itself***
+- If the counter function stores its own state, then it is uncontrolled component
+***A controlled component is one whose state is controlled by its parent(via props)***
+
+- Lifting state up means that we have a parent component which holds all the state and the functions to modify that state.
+- For example in the counter example, we can have the parent App() function hold all the counter state along with functions to increment and decrement data and pass those functions down to the child components.
+- The child components can then execute those functions, say, executing increment method on increment button click or executing decrement method on decrement button click. This is called lifting state up.
+
+```javascript
+function App()
+{
+    const [counterData,setCounterData] = React.useState([
+        new CounterObj('A',true,0),
+        new CounterObj('B',true,0),
+        new CounterObj('C',true,0)
+    ])
+
+    const increment = (index) =>{
+        const newData = [...counterData];
+        newData[index].total = newData[index].total + 1;
+        setCounterData(newData);
+    }
+
+    const decrement = (index) =>{
+        const newData = [...counterData];
+        const decrementedCounter = newData[index].total - 1;
+        newData[index].total = decrementedCounter >= 0 ?
+            decrementedCounter : 0;
+        setCounterData(newData);
+    }
+
+
+    return (
+    <>
+        <h1>Counters</h1>
+        <section>
+            <CounterList counterData = {counterData} increment = {increment} decrement = {decrement}/>
+            <CounterSummary counterData = {counterData}/>
+        </section>
+    </>
+    )
+}
+
+function CounterSummary({counterData}){
+    const summary = counterData.map((counter)=>{
+        return counter.name + '('+counter.total + ')';
+    }).join(', ');
+    return (
+        <p>
+           Summary: {summary}
+        </p>
+    )
+}
+
+function CounterList({counterData,increment,decrement}){
+    const updateTitle = useDocumentTitle("Clicks: "+counterData.map((counter)=>{
+        return counter.total;
+    }).join(', '))
+    return (
+       <section>
+        {counterData.map((counter,index)=>(
+            <Counter key = {index} counter={counter} index = {index} increment = {increment} decrement = {decrement}/> 
+        ))}
+       </section>
+    )
+}
+
+function useDocumentTitle(title)
+{
+    return React.useEffect(()=>{
+     const originalTitle = document.title;
+     document.title = title;
+     return () =>{
+        document.title = originalTitle;
+     }   
+    },[title])
+}
+
+function useCounter(){
+    const [counterVal,setCounterVal] = React.useState({total:0}); 
+    const increment = () =>{
+        setCounterVal({...counterVal,total: counterVal.total + 1})
+    }
+    return [
+        counterVal,
+        increment
+    ]
+}
+//Change the uncontrolled component to controlled component
+function Counter({counter,index,increment,decrement})
+{
+
+    function handleIncrementClick(){
+       increment(index);
+    }
+
+    function handleDecrementClick(){
+        decrement(index);
+     }
+
+    return (
+        <dl className = "counter">
+            <dt> {counter.name}</dt>
+                <div>
+                    <button onClick={handleIncrementClick} className="button">
+                        +
+                    </button>
+                </div>
+            <dd className = "counter__value">{counter.total }</dd>
+            <div>
+                <button onClick={handleDecrementClick} className="button">
+                    -
+                </button>
+            </div>
+       </dl>
+    )
+}
+
+```
+- As you can see above the counter function has now become a controlled component as it gets its own state from the parent component CounterList which in turn gets it from App(which is the uncontrolled parent component)
+- But this approach has problems and can introduce bugs.
+- What if the child component passes the wrong data or at the wrong level the state is modified
+- We may need to fix it in the parent component
+- State Management is complex
+- Therefore, we need centralized state management like Redux
+
+

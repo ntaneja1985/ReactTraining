@@ -8,35 +8,53 @@ root.render(<App/>);
 /* Objects */ 
 class CounterObj {
 
-    constructor(name) {
+    constructor(name,show,total) {
         this.name = name;
-        this.show = true;
-        this.total = 0;
+        this.show = show;
+        this.total = total;
     }
 }
 
-const counterData = [
-    new CounterObj('A'),
-    new CounterObj('B'),
-    new CounterObj('C')
-]
+
 
 /* End Objects*/
 
+//Uncontrolled component (parent)
 function App()
 {
+    const [counterData,setCounterData] = React.useState([
+        new CounterObj('A',true,0),
+        new CounterObj('B',true,0),
+        new CounterObj('C',true,0)
+    ])
+
+    const increment = (index) =>{
+        const newData = [...counterData];
+        newData[index].total = newData[index].total + 1;
+        setCounterData(newData);
+    }
+
+    const decrement = (index) =>{
+        const newData = [...counterData];
+        const decrementedCounter = newData[index].total - 1;
+        newData[index].total = decrementedCounter >= 0 ?
+            decrementedCounter : 0;
+        setCounterData(newData);
+    }
+
+
     return (
     <>
         <h1>Counters</h1>
         <section>
-            <CounterList/>
-            <CounterSummary/>
+            <CounterList counterData = {counterData} increment = {increment} decrement = {decrement}/>
+            <CounterSummary counterData = {counterData}/>
         </section>
     </>
     )
 }
 
-function CounterSummary(){
+function CounterSummary({counterData}){
     const summary = counterData.map((counter)=>{
         return counter.name + '('+counter.total + ')';
     }).join(', ');
@@ -47,11 +65,14 @@ function CounterSummary(){
     )
 }
 
-function CounterList(){
+function CounterList({counterData,increment,decrement}){
+    const updateTitle = useDocumentTitle("Clicks: "+counterData.map((counter)=>{
+        return counter.total;
+    }).join(', '))
     return (
        <section>
         {counterData.map((counter,index)=>(
-            <Counter name={counter.name}/> 
+            <Counter key = {index} counter={counter} index = {index} increment = {increment} decrement = {decrement}/> 
         ))}
        </section>
     )
@@ -78,26 +99,31 @@ function useCounter(){
         increment
     ]
 }
-
-function Counter(props)
+//Change the uncontrolled component to controlled component
+function Counter({counter,index,increment,decrement})
 {
-    const [counter,incrementCounter] = useCounter();
 
-    const updateTitle = useDocumentTitle("Clicks " + counter.total)
-
-    function handleClick(){
-        incrementCounter();
-        console.log(counterData);
+    function handleIncrementClick(){
+       increment(index);
     }
 
+    function handleDecrementClick(){
+        decrement(index);
+     }
+
     return (
-        <article>
-        <h2>Counter {props.name}</h2>
-        <p>You clicked {counter.total } times</p>
-        <button onClick={handleClick} className="button">
-            Click Me!
-        </button>
-    </article>
+        <dl className = "counter">
+            <dt> {counter.name}</dt>
+            <dd className = "counter__value">
+                <button onClick={handleIncrementClick} className="button">
+                    +
+                </button>
+                    {counter.total }
+                <button onClick={handleDecrementClick} className="button">
+                    -
+                </button>
+                </dd>
+       </dl>
     )
 }
 
