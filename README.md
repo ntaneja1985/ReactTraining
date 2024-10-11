@@ -2154,3 +2154,75 @@ function Counter({ counter, index }) {
 
 # memo,useMemo and useCallback
 - Important to improve performance of our applications
+- Memoization: Store the result of a computation(so that we dont have to repeat the computation itself)
+- Memoize means to store the results of a function and return those results when the function is requested with the same inputs(rather than running the function again).
+- Requires the function is pure.
+
+```javascript
+function memoizedSquare(a){
+    let memoizedResults = {};
+    return function sq(a){
+        if(a in memoizedResults)
+        {
+            return memoizedResults[a];
+        }
+        const result = a*a;
+        memoizedResults[a] = result;
+        return result;
+    }
+}
+
+const memoSq = memoizedSquare();
+console.time();
+console.log(memoSq(489897));
+console.timeEnd();
+console.log(memoSq(4));
+console.log(memoSq(6));
+console.time();
+console.log(memoSq(489897));
+console.timeEnd();
+```
+- Calculating the results of functional component in React is expensive
+- So react helps us by providing some memoization options and improve performance.
+- memo takes a type and comparison function
+- If comparison function is not provided, react does it comparison by doing shallow equality.
+- When we pass objects and if we are only using properties, we should be careful because React does shallow equality it doesnot compare by value, rather it compares the location in memory of old props and new props
+- Use React Memo like this:
+
+```javascript
+
+function CounterSummary() {
+  const [contextData, increment, decrement] = React.useContext(CounterContext);
+  const sortedData = [...contextData].sort((a, b) => {
+    return b.total - a.total;
+  });
+  const filteredSortedData = sortedData
+    .filter((x) => x.show);
+  return (
+    <section>
+      Summary: {filteredSortedData.map((counter,index)=>(
+        <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
+      ))}
+    </section>
+  );
+}
+
+const CounterSummaryDetails = React.memo(function CounterSummaryDetails(props)
+{
+    console.log("Rendering Counter Summary Detail "+props.counterName)
+  return (
+    <p>
+      {props.counterName}({props.counterTotal})
+    </p>
+  )
+});
+
+```
+1. We should not memo every function because it increases storage space of our application
+2. Use memo() only for expensive calculations
+3. memo() uses shallow equality and it compares only the props object. Only first level of props changes are used. For e.g props.counterName and not props.counter.name
+4. So split up your props
+5. What is data comes from context? We should not memo functions that get data from useContext. context bypasses props to avoid prop drilling
+6. ***memo specifically compares the props***
+7. Getting data from useContext and using Memo doesnot really go well together.
+8. Use React memo function on those functions which are pure and which get their data from props
