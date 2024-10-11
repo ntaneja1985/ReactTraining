@@ -48,19 +48,17 @@ function App()
         <h1>Counters</h1>
         <section>
             <CounterList counterData = {counterData} increment = {increment} decrement = {decrement}/>
-            <CounterTools>
-                <CounterSummary counterData = {counterData}/>
-            </CounterTools>  
+            <CounterTools counterData = {counterData}/>
+                {/* <CounterSummary counterData = {counterData}/>
+            </CounterTools>   */}
         </section>
     </>
     )
 }
 
-function CounterTools({children}){
+function CounterTools({counterData}){
     return (
-        <>
-        {children}
-        </>
+       <CounterSummary counterData = {counterData} />
         
     )
 }

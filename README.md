@@ -1859,3 +1859,204 @@ function CounterTools({children}){
     )
 }
 ```
+
+# useContext
+- Centralize data in React, how do we re-render our components or fiber node when that piece of data changes
+- useContext solves the problem of prop-drilling
+
+# prop-drilling:
+- Passing props down through components that dont need those props in order to reach descendant components that do need the props.
+
+```javascript
+<CounterTools counterData = {counterData}/>
+function CounterTools({counterData}){
+    return (
+       <CounterSummary counterData = {counterData} />
+        
+    )
+}
+
+```
+- In the above code, Counter Tools doesnt need counterData, but Counter Summary does. 
+- So we have to pass first the props to CounterTools which then passes it down to CounterSummary
+- This is an example of prop-drilling
+- In complex applications it causes issues and might lead to bugs
+- To solve this we have useContext()
+
+# Using useContext
+- React UI library comes with useContext() hook included
+- Within useContext() we have provider object which just specifies that it is a type of provider(REACT_PROVIDER_TYPE) and references its own parent (context) (circular reference)
+- Newly created context object is returned
+- We create a context with the following code:
+  ```javascript
+    const CounterContext = React.createContext(3);
+
+  ```
+
+  - We can use this context to provide data to other components but those components can be spread out underneath the context
+  - If this data is changed, those components will be updated.
+ 
+```javascript
+function App() {
+  const [counterData, setCounterData] = React.useState([
+    new CounterObj("A", true, 0),
+    new CounterObj("B", false, 0),
+    new CounterObj("C", true, 0),
+  ]);
+
+  
+
+  const increment = (index) => {
+    const newData = [...counterData];
+    newData[index].total = newData[index].total + 1;
+    setCounterData(newData);
+  };
+
+  const decrement = (index) => {
+    const newData = [...counterData];
+    const decrementedCounter = newData[index].total - 1;
+    newData[index].total = decrementedCounter >= 0 ? decrementedCounter : 0;
+    setCounterData(newData);
+  };
+  const contextData = [counterData, increment, decrement];
+  console.log(CounterContext);
+  return (
+    <>
+        //Use CounterContext.Provider at the top level of the tree so that context is available to //all its children
+      <CounterContext.Provider value={contextData}>
+        <h1>Counters</h1>
+        <section>
+          <CounterList/>
+          <CounterTools />
+        </section>
+      </CounterContext.Provider>
+    </>
+  );
+}
+
+\\Using contextData in CounterList and CounterSummary is done like this
+
+function CounterSummary() {
+    const [contextData,increment,decrement] = React.useContext(CounterContext);
+  const sortedData = [...contextData].sort((a, b) => {
+    return b.total - a.total;
+  });
+  const summary = sortedData
+    .filter((x) => x.show)
+    .map((counter) => {
+      return counter.name + "(" + counter.total + ")";
+    })
+    .join(", ");
+  return <p>Summary: {summary}</p>;
+}
+
+function CounterList() {
+const [contextData,increment,decrement] = React.useContext(CounterContext);
+  const updateTitle = useDocumentTitle(
+    "Clicks: " +
+        contextData
+        .map((counter) => {
+          return counter.total;
+        })
+        .join(", ")
+  );
+  return (
+    <section>
+      {contextData.map((counter, index) => (
+        <Counter
+          key={index}
+          counter={counter}
+          index={index}
+          increment={increment}
+          decrement={decrement}
+        />
+      ))}
+    </section>
+  );
+}
+
+```
+ - useContext hook calls readContext which uses updateContextProvider
+ - CounterContext.Provider is a functional component and contextData is a prop that is provided
+ - So what is contextData provided here ? It is 
+```javascript
+const contextData = [counterData, increment, decrement];
+
+```
+
+- So if contextData changes it will let the CounterContext.Provider know that something has changed in the data and re-render yourself.
+- It calls the updateContextProvider
+- If the provider is updated, then readContext gets the updated value
+- So then those updates will be propagated: Propagate means to spread or flow something. In case of React tree data structure, it means to call the child functions (descendant nodes) with the new state.
+- All the functional components which use that context will be re-rendered.
+- Whenever any component makes use of useContext() it is added to the linked list of dependencies of that context.
+- So if the context updates due to change in its values, all its dependencies are updated as well.
+- We can have multiple context providers with the same context using different values
+- When we use a Context.Provider, we put a special type of node inside the fiber tree called the Context Provider. Provider is special. It points to context.So for Provider A, it points to Context A.
+- If there is a different context, it gets a different provider.
+![alt text](image-1.png)
+
+![alt text](image-2.png)
+
+- Lets say we have multiple providers inside React code like this
+```javascript
+<Forms.Provider>
+    <LocalStorage.Provider>
+        <Reports.Provider>
+            <MyApp>
+        </Reports.Provider>
+    </LocalStorage.Provider>
+</Forms.Provider>
+
+```
+
+- Here Forms.Provider, LocalStorage.Provider, Reports.Provider are different nodes in the fiber tree.
+- They may reference different contexts for e.g formsContext, reportsContext, localStorageContext
+- When data inside each of these contexts change, any component that uses that particular context will be re-rendered only. None of the other components will be affected.
+- Also if use context, then the value of contextData also changes as we process down the tree.
+
+## What if we multiple context providers using the same type of context
+
+```javascript
+function CounterTools() {
+    const [counterData, setCounterData] = React.useState([
+        new CounterObj("A", true, 3),
+        new CounterObj("B", true, 2),
+        new CounterObj("C", true, 0),
+      ]);
+
+      const contextData = [counterData,null,null];
+  return (
+    <CounterContext.Provider value={contextData}>
+        <CounterSummary />
+  </CounterContext.Provider>
+);
+}
+
+```
+
+- In the above code, Counter Summary component will only change if the contextData in its own provider provided above will change. 
+- It is no longer dependent on root context provider.
+- As the Fiber tree is processed node by node, if it finds a provider A React will process all the components using that context(provided by that provider A) until and unless it encounters another provider B providing similar type of contextData.
+- In that case, data for all components under Provider B will depends on provider B's context and not on Provider A(which is the root level provider)
+  
+## What if we have multiple contexts
+![alt text](image-3.png)
+
+1. Everytime we use useContext() inside a component, we mark that component or that particular fiber node as dependent on that particular context. So everytime that context changes, that particular functional component is re-rendered.
+
+![alt text](image-4.png)
+
+![alt text](image-5.png)
+
+![alt text](image-6.png)
+
+***To summarize we have createContext(), Context.Provider and useContext()***
+- context is just an object, context provider is used to update values on that object at that moment and useContext is used to set a dependency to that context and returning the current value of that context.
+
+# Use context with Caution
+- The tree gets complex and we have centralized state and more the state changes, the more re-renders we have of its children
+- The higher the state is, more functional components get executed and more re-renders
+- The more the number of context, the harder it is to keep track of it.
+- Whether we pass props(do prop drilling) or useContext, there are pros and cons of each approach.
+- This can vary depending on the size of the applications, whether we are using any third party tools
