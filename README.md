@@ -1781,4 +1781,81 @@ function Counter({counter,index,increment,decrement})
 - State Management is complex
 - Therefore, we need centralized state management like Redux
 
+# Logic in JSX
 
+## && operator
+```javascript
+function Counter({counter,index,increment,decrement})
+{
+
+    function handleIncrementClick(){
+       increment(index);
+    }
+
+    function handleDecrementClick(){
+        decrement(index);
+     }
+
+    return (
+        <dl className = "counter">
+            <dt> {counter.name}</dt>
+            <dd className = "counter__value">
+                <button onClick={handleIncrementClick} className="button">
+                    +
+                </button>
+                {counter.total}
+             {
+               counter.total > 0 &&
+                 <button onClick={handleDecrementClick} className="button">
+                     -
+                 </button>
+             }
+               
+                </dd>
+       </dl>
+    )
+}
+
+```
+
+- Using maps and filters
+
+```javascript
+function CounterSummary({counterData}){
+    const sortedData = [...counterData].sort((a,b)=>{
+        return b.total - a.total;
+    })
+    const summary = sortedData.filter(x=>x.show).map((counter)=>{
+            return counter.name + '('+counter.total + ')'
+    }).join(', ');
+    return (
+        <p>
+           Summary: {summary}
+        </p>
+    )
+}
+```
+
+## Children property inside props
+- All props come along with a property called children
+- This children property is an array of the elements of the JSX we are dealing with
+- Here Counter Summary is the first item in the array of children in the Counter Tools props
+
+```javascript
+ <CounterTools>
+    <CounterSummary counterData = {counterData}/>
+ </CounterTools>  
+
+```
+- So for CounterTools component we can display the children like this:
+
+```javascript
+function CounterTools({children}){
+    return (
+        <>
+        {children}
+        </>
+        
+    )
+}
+```
