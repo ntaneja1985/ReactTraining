@@ -1,4 +1,4 @@
-<# ReactTraining
+# ReactTraining
 React Training by Tony Alicea
 
 React source code is open source:
