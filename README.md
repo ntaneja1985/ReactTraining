@@ -1,4 +1,4 @@
-# ReactTraining
+# React Training
 React Training by Tony Alicea
 
 React source code is open source:
@@ -2060,3 +2060,97 @@ function CounterTools() {
 - The more the number of context, the harder it is to keep track of it.
 - Whether we pass props(do prop drilling) or useContext, there are pros and cons of each approach.
 - This can vary depending on the size of the applications, whether we are using any third party tools
+
+# useId and Key
+
+- Used for identifying nodes in the DOM
+- Helps us with accessibility(makes our web application are usable by all people like people who are using screen-reader)
+- In HTML we have <fieldset> element which represents a set of form controls (or other content) grouped together optionally with a caption. The caption is given by the first <legend> element that is a child of fieldset element. The remainder of the descendants form a group
+- Lets say inside our component we want to assign our specific HTML elements some unique Ids
+```javascript
+function Counter({ counter, index }) {
+  const [contextData, increment, decrement] = React.useContext(CounterContext);
+
+  function handleIncrementClick() {
+    increment(index);
+  }
+
+  function handleDecrementClick() {
+    decrement(index);
+  }
+
+  return (
+    <fieldset className="counter" id="counter">
+      <legend className="counter__legend"> {counter.name}</legend>
+      {/* <dd className="counter__value"> */}
+      <button onClick={handleIncrementClick} className="button">
+        +
+      </button>
+      <p>{counter.total}</p>
+      {counter.total > 0 && (
+        <button onClick={handleDecrementClick} className="button">
+          -
+        </button>
+      )}
+      {/* </dd> */}
+    </fieldset>
+  );
+}
+
+
+```
+
+- Problem with above code is that if the component is rendered multiple times, each of the instances of the component will have the same Id value for the element whose id we have set. So we will see the following:
+  
+```javascript
+<fieldset className="counter" id="counter">
+<fieldset className="counter" id="counter">
+<fieldset className="counter" id="counter">
+
+```
+- We want uniquely identifiable IDs
+- ***So we useId() hook***
+- Use this code
+
+```javascript
+  const id = React.useId();
+   <fieldset className="counter" id={id}>
+```
+- aria-label can be used for visually impaired to announce to them how this element is used.(Used by screen-readers)
+- useId() hook is used mainly in the forms
+- The id so generated is stored inside the hook which is attached to fiber node
+
+# Key
+- Used for identifying individual DOM elements and tracking them
+- Key difference with useId() is that useId() is used to uniquely identifying elements as a software feature(like in forms,screen-readers) but Key is used specifically to make React as efficient as possible.
+- Key affects the results of the reconciliation algorithm.
+![alt text](image-7.png)
+
+- Every update (create DOM element, update DOM element, delete DOM element) is expensive. It is a lot of work. Reconciliation algorithm tries to minimize that work
+![alt text](image-8.png)
+
+- React has to compare current and work in progress branches
+- Key props helps us here
+- Lets say we assign an Id as key props to eggs, milk and oil (set it to 30,40,50)
+  ![alt text](image-9.png)
+- Lets say we delete eggs
+- Now react will say that only eggs with Id of 30 is missing, so it will do only 1 DOM update.
+- Key helps React figure out what moved, deleted and updated.
+- React can take advantage of key to compare current and work in progress branches of Fiber tree.
+- Thats why inside a loop we get warning: each child in a list should have a unique "key" prop
+- In large application, key props makes a big difference.
+- We can do something like this:
+
+```javascript
+ <section>
+      {contextData.map((counter, index) => (
+        <Counter key={counter.id} counter={counter} index={index} />
+      ))}
+    </section>
+```
+
+- Moving a DOM element around is more efficient that creating/updating/deleting DOM nodes.
+- ***useId() is about accessibility and Key is about performance of Reconciliation algorithm***
+
+# memo,useMemo and useCallback
+- Important to improve performance of our applications
