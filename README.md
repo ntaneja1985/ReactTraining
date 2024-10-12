@@ -2226,3 +2226,62 @@ const CounterSummaryDetails = React.memo(function CounterSummaryDetails(props)
 6. ***memo specifically compares the props***
 7. Getting data from useContext and using Memo doesnot really go well together.
 8. Use React memo function on those functions which are pure and which get their data from props
+
+# useMemo
+- Memoizing a value
+- Memoizing the results of a function within a function component 
+  
+***Please note this***
+
+```javascript
+//correct way
+onClick={()=>{setVisibleTab(1)}}
+//incorrect way
+onClick={setVisibleTab(1)}
+
+```
+1. In the above code, when we dont use arrow functions, when the component is rendered, the method defined inside onClick is run automatically which is not right
+2. Put it inside an arrow function and it will make sure that the code runs when the onClick is executed(i.e on clicking the element)
+
+- useMemo calls mountMemo which takes an input a function and dependencies.
+- It calls the function we give it and stores the resulting values as state on a hook along with list of dependencies
+- So it memoizes the results of that functions and re-computes again only if the dependencies change
+- Compares nextDependencies and prevDependencies
+![alt text](image-10.png)
+
+- Sometimes it is not possible for us to prevent re-renders of functions. However we can memoize certain values inside a function and ensure they run only when certain dependencies change.
+- Lets assume we have 2 tabs and we are displaying some state elements in those tabs. Now whenever we change some values in those 2 tabs, the functional component will be re-rendered. However we can prevent some things from being recomputed again and again using useMemo
+
+```javascript
+function CounterSummary({counterData,visibleTab,setVisibleTab}) {
+  console.log("Rendering Counter Summary")
+  // const sortedData = [...counterData].sort((a, b) => {
+  //   return b.total - a.total;
+  // });
+  const filteredSortedData = React.useMemo(()=>{
+    console.log("Filtering Data");
+    return counterData
+    .filter((x) => x.tab === visibleTab);},[visibleTab])
+
+  return (
+    <section>
+      <header>
+        <a href="#" onClick={()=>{setVisibleTab(1)}}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
+        <a href="#" onClick={()=>{setVisibleTab(2)}}>Tab 2</a> 
+      </header>
+      {filteredSortedData.map((counter,index)=>(
+        <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
+      ))}
+    </section>
+  );
+}
+
+```
+
+- In the above code, we are memoizing the results of the filteredSortedData. It will only re-compute when the dependencies specified to it i.e. visibleTab changes..typically that is something that comes in as a prop.
+- useMemo can improve the performance of our application by skipping that piece of code that doesnt need to be computed again and again.
+
+# useCallback
+1. We have seen so far the memoizing the entire results of a functional component(React.memo()) and memoizing the results of a single function inside one of our components(React.useMemo()) but what about memoizing an entire function itself ?
+2. We use useCallback() function
+3. Functions in javascript is just a special kind of object, we are referencing them just by their location in memory

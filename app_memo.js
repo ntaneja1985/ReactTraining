@@ -7,25 +7,26 @@ root.render(<App />);
 
 /* Objects */
 class CounterObj {
-  constructor(id,name, show, total) {
+  constructor(id,name, tab, total) {
     this.id = id;
     this.name = name;
-    this.show = show;
+    this.tab = tab;
     this.total = total;
   }
 }
 
 /* End Objects*/
 
-const CounterContext = React.createContext(3);
 
 //Uncontrolled component (parent)
 function App() {
   const [counterData, setCounterData] = React.useState([
-    new CounterObj(1,"A", true, 0),
-    new CounterObj(2,"B", true, 0),
-    new CounterObj(3, "C", true, 0),
+    new CounterObj(1,"A", 1, 0),
+    new CounterObj(2,"B", 2, 0),
+    new CounterObj(3, "C", 1, 0),
   ]);
+
+  const [visibleTab,setVisibleTab] = React.useState(1);
 
   const increment = (index) => {
     const newData = [...counterData];
@@ -39,36 +40,41 @@ function App() {
     newData[index].total = decrementedCounter >= 0 ? decrementedCounter : 0;
     setCounterData(newData);
   };
-  const contextData = [counterData, increment, decrement];
+
   return (
     <>
-      <CounterContext.Provider value={contextData}>
         <h1>Counters</h1>
         <section>
-          <CounterList />
-          <CounterTools />
+          <CounterList counterData = {counterData} increment= {increment} decrement = {decrement} />
+          <CounterTools counterData = {counterData} visibleTab = {visibleTab} setVisibleTab = {setVisibleTab}  />
         </section>
-      </CounterContext.Provider>
     </>
   );
 }
 
-function CounterTools() {
+function CounterTools({counterData,visibleTab,setVisibleTab}) {
   return (
-        <CounterSummary />
+        <CounterSummary counterData = {counterData} visibleTab = {visibleTab} setVisibleTab = {setVisibleTab} />
   );
 }
 
-function CounterSummary() {
-  const [contextData, increment, decrement] = React.useContext(CounterContext);
-  const sortedData = [...contextData].sort((a, b) => {
-    return b.total - a.total;
-  });
-  const filteredSortedData = sortedData
-    .filter((x) => x.show);
+function CounterSummary({counterData,visibleTab,setVisibleTab}) {
+  console.log("Rendering Counter Summary")
+  // const sortedData = [...counterData].sort((a, b) => {
+  //   return b.total - a.total;
+  // });
+  const filteredSortedData = React.useMemo(()=>{
+    console.log("Filtering Data");
+    return counterData
+    .filter((x) => x.tab === visibleTab);},[visibleTab])
+
   return (
     <section>
-      Summary: {filteredSortedData.map((counter,index)=>(
+      <header>
+        <a href="#" onClick={()=>{setVisibleTab(1)}}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
+        <a href="#" onClick={()=>{setVisibleTab(2)}}>Tab 2</a> 
+      </header>
+      {filteredSortedData.map((counter,index)=>(
         <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
       ))}
     </section>
@@ -85,11 +91,10 @@ const CounterSummaryDetails = React.memo(function CounterSummaryDetails(props)
   )
 });
 
-function CounterList() {
-  const [contextData, increment, decrement] = React.useContext(CounterContext);
+function CounterList({counterData,increment,decrement}) {
   const updateTitle = useDocumentTitle(
     "Clicks: " +
-      contextData
+      counterData
         .map((counter) => {
           return counter.total;
         })
@@ -97,8 +102,8 @@ function CounterList() {
   );
   return (
     <section>
-      {contextData.map((counter, index) => (
-        <Counter key={counter.id} counter={counter} index={index} />
+      {counterData.map((counter, index) => (
+        <Counter key={counter.id} increment={increment} decrement={decrement} counter={counter} index={index} />
       ))}
     </section>
   );
@@ -122,8 +127,7 @@ function useCounter() {
   return [counterVal, increment];
 }
 //Change the uncontrolled component to controlled component
-function Counter({ counter, index }) {
-  const [contextData, increment, decrement] = React.useContext(CounterContext);
+function Counter({ counter, index,increment,decrement }) {
   const id = React.useId();
   function handleIncrementClick() {
     increment(index);
