@@ -2686,3 +2686,9 @@ console.log(counters);
 - Build tool for faster and leaner development experience for modern web projects
 - Consists of 2 major parts: dev Server and build command that bundles our code with Rollup, pre-configured to output highly optimized static assets for production.
 - Very Fast
+# Frameworks
+- React recommends using Frameworks
+- Next JS, Gatsby, Remix
+- No routing in React
+- Multiple UIs in our application
+- React is a UI library which is used to update the DOM
