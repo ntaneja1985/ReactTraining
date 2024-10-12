@@ -2693,7 +2693,7 @@ console.log(counters);
 - Multiple UIs in our application
 - React is a UI library which is used to update the DOM
 
-# Strict Code
+# Strict Mode
 - Helps us to avoid bugs
 - It is about avoiding mistakes
 - Just like Context.Provider are a special type of node in the fiber tree so is the Strict Mode
