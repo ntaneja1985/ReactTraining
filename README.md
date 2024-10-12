@@ -2636,3 +2636,53 @@ function Counter({ counter}) {
 - We need to consider the trade-off of having all this code or whether useContext and useReducer be enough for us
 
 # ToolChains  
+- ToolChains: A set of tools used together to help developers build software
+- Editor, Package Manager, Transpiler, Bundler, Linter and Formatters, Testing, Development Server
+
+# ES Modules
+- Let us say we want to split our code into separate files.
+- Create a new file called otherCode.js and include the following code:
+```javascript
+export class CounterObj {
+    constructor(id, name, tab, total) {
+      this.id = id;
+      this.name = name;
+      this.tab = tab;
+      this.total = total;
+    }
+  }
+
+```
+- In the above code if we specify export statement we are basically tell Javascript engine to make this code available outside this file
+- Now to use this code we can import it like this:
+```javascript
+import {CounterObj} from './othercode.js'
+
+const counters = [
+  new CounterObj(1, "A", 1, 0),
+  new CounterObj(2, "B", 2, 0),
+  new CounterObj(3, "C", 1, 0),
+]
+
+console.log(counters);
+
+```
+- This way we can split our code into modules and we also need to let the browser know about this by using the following code in HTML:
+
+```javascript
+<script src="app_ToolChains.js" type ="module"></script>
+```
+- Earlier we used to have commonJS Modules, now we have ES Modules
+- These export and import statements are not just instructions to the browser but they can also be instructions to a bundler to package all these files together into a single file and define where to use what using import and export statements
+- When we are ready to go to production, we can ship just one large file with all the code bundled together, using the above modules.
+
+# Create-React-App
+- npm create-react-app my-app
+- No longer appears in React's official documentation
+- Was used earlier
+- Is slow especially while doing development(personal experience)
+
+# Vite
+- Build tool for faster and leaner development experience for modern web projects
+- Consists of 2 major parts: dev Server and build command that bundles our code with Rollup, pre-configured to output highly optimized static assets for production.
+- Very Fast
