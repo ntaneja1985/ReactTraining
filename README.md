@@ -2390,3 +2390,249 @@ const CounterSummaryHeader = React.memo(function CounterSummaryHeader({setVisibl
 - We get our code + memoization
 
 # useContext and Reducer
+- We deal a lot of state and lot of logic around state
+- Common way to work with that is to combine useContext() and reducer
+- Centralize way to manage our state
+- Take a look at the following code:
+
+```javascript
+//Create context for Counter and Tabs
+const CounterContext = React.createContext(null);
+const CounterDispatchContext = React.createContext(null);
+const TabContext = React.createContext(null);
+const TabDispatchContext = React.createContext(null);
+
+//Create a counter Reducer which will take the counter Data and action passed to it and change the state based on the action
+//Example of command pattern where actions are objects
+function counterReducer(counterData, action) {
+  switch (action.type) {
+    case "increment": {
+      return counterData.map((counter) => {
+        if (counter.id === action.id) {
+          return { ...counter, total: counter.total + 1 };
+        } else {
+          return counter;
+        }
+      });
+    }
+    case "decrement": {
+      return counterData.map((counter) => {
+        if (counter.id === action.id) {
+          return {
+            ...counter,
+            total: counter.total >= 0 ? counter.total - 1 : 0,
+          };
+        } else {
+          return counter;
+        }
+      });
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+
+//Create a counter Reducer which will take the counter Data and action passed to it and change the state based on the action
+//Example of command pattern where actions are objects
+function tabReducer(visibleTab, action) {
+  switch (action.type) {
+    case "change-tab": {
+      if (action.tab === visibleTab) {
+        return visibleTab;
+      } else {
+        return action.tab;
+      }
+    }
+    default: {
+      throw Error("Unknown action: " + action.type);
+    }
+  }
+}
+//Uncontrolled component (parent)
+function App() {
+  //Set the useReducer and specify the reducer to use and the initial state of the data
+  const [counterData, counterDispatch] = React.useReducer(counterReducer, [
+    new CounterObj(1, "A", 1, 0),
+    new CounterObj(2, "B", 2, 0),
+    new CounterObj(3, "C", 1, 0),
+  ]);
+
+//Set the useReducer and specify the reducer to use and the initial state of the data
+  const [visibleTab, tabDispatch] = React.useReducer(tabReducer, 1);
+
+//Set the various providers which will make the context available across all the components
+  return (
+    <>
+      <CounterContext.Provider value={counterData}>
+        <CounterDispatchContext.Provider value={counterDispatch}>
+          <TabContext.Provider value={visibleTab}>
+            <TabDispatchContext.Provider value={tabDispatch}>
+              <h1>Counters</h1>
+              <section>
+                <CounterList />
+                <CounterTools />
+              </section>
+            </TabDispatchContext.Provider>
+          </TabContext.Provider>
+        </CounterDispatchContext.Provider>
+      </CounterContext.Provider>
+    </>
+  );
+}
+
+function CounterTools() {
+  return (
+    <CounterSummary
+    />
+  );
+}
+//Use the context to set the dispatch actions and use the value of the state object from the context.
+function CounterSummary() {
+  const counterData = React.useContext(CounterContext);
+  const visibleTab = React.useContext(TabContext);
+  const tabDispatch = React.useContext(TabDispatchContext);
+
+  console.log("Rendering Counter Summary");
+  const filteredSortedData = React.useMemo(() => {
+    console.log("Filtering Data");
+    return counterData.filter((x) => x.tab === visibleTab);
+  }, [counterData,visibleTab]);
+
+  const setVisibleTab1 = React.useCallback((event) => {
+    tabDispatch({type:'change-tab', tab: 1})
+    event.preventDefault();
+  }, []);
+  const setVisibleTab2 = React.useCallback((event) => {
+    tabDispatch({type:'change-tab', tab: 2})
+    event.preventDefault();
+  }, []);
+
+  return (
+    <section>
+      <CounterSummaryHeader
+        setVisibleTab1={setVisibleTab1}
+        setVisibleTab2={setVisibleTab2}
+      />
+      {filteredSortedData.map((counter) => (
+        <CounterSummaryDetails
+          key={counter.id}
+          counterName={counter.name}
+          counterTotal={counter.total}
+        />
+      ))}
+    </section>
+  );
+}
+
+const CounterSummaryHeader = React.memo(function CounterSummaryHeader({
+  setVisibleTab1,
+  setVisibleTab2,
+}) {
+
+  return (
+    <header>
+      <a href="#" onClick={setVisibleTab1}>
+        Tab 1
+      </a>{" "}
+      &nbsp;&nbsp; | &nbsp;&nbsp;
+      <a href="#" onClick={setVisibleTab2}>
+        Tab 2
+      </a>
+    </header>
+  );
+});
+
+const CounterSummaryDetails = React.memo(function CounterSummaryDetails(props) {
+  return (
+    <p>
+      {props.counterName}({props.counterTotal})
+    </p>
+  );
+});
+
+//Use the context to use the value of the state object from the context.
+function CounterList() {
+  const counterData = React.useContext(CounterContext);
+
+  const updateTitle = useDocumentTitle(
+    "Clicks: " +
+      counterData
+        .map((counter) => {
+          return counter.total;
+        })
+        .join(", ")
+  );
+  return (
+    <section>
+      {counterData.map((counter) => (
+        <Counter
+          key={counter.id}
+          counter={counter}
+        />
+      ))}
+    </section>
+  );
+}
+//Use the context to set the dispatch actions and use the value of the state object from the context.
+function Counter({ counter}) {
+  const counterDispatch = React.useContext(CounterDispatchContext);
+  const id = React.useId();
+  function handleIncrementClick(event) {
+    counterDispatch({type:'increment',id:counter.id})
+    event.preventDefault();
+  }
+
+  function handleDecrementClick(event) {
+    counterDispatch({type:'decrement',id:counter.id});
+    event.preventDefault();
+  }
+
+  return (
+    <fieldset className="counter" id={id}>
+      <legend className="counter__legend" id={id + "__legend"}>
+        {" "}
+        {counter.name}
+      </legend>
+      {/* <dd className="counter__value"> */}
+      <button
+        onClick={handleIncrementClick}
+        aria-label="Increase Counter"
+        className="button"
+      >
+        +
+      </button>
+      <p>{counter.total}</p>
+      {counter.total > 0 && (
+        <button onClick={handleDecrementClick} className="button">
+          -
+        </button>
+      )}
+      {/* </dd> */}
+    </fieldset>
+  );
+}
+
+```
+
+- In the above code we make use of useContext and useReducer to centralize the state management
+- Context consists of createContext, Provider and useContext
+- The context is used to store the state objects
+- The useReducer is used to pass the state objects and various actions to the reducer which will change the state based on the actions
+- In the handleClick method dispatch the various actions
+- In the above example we dispatch actions to change the state of the counterData and tabData
+- Everytime the state changes the component re-render but we optimize the rendering process by using React memo, useMemo and useCallback
+
+# 3rd party State Management
+- Redux, Zustand
+- The idea of redux is based on flux where we have reducers and actions and get new state back.
+- React Redux uses the concept of slices where we basically use useContext and Reducers by slicing them up into a single piece.
+- In React Redux it seems that we are mutating the state, but under the hood it doesnot mutate the state because it uses a library called Immer.JS which detects changes to a "draft" state and produces a brand new immutable state based off those changes. Also no return statement is required from these functions
+- Another tool that is popular is Zustand.
+- Based on immutable state model
+- Redux requires the app to be wrapped in context providers but Zustand doesnt.
+- In Zustand we can also split store into slices.
+- We also have to consider that whenever we use 3rd party libraries we also have to download and include their code along with our code making our application code heavy(ultimately it is all downloaded into the browser)
+- We need to consider the trade-off of having all this code or whether useContext and useReducer be enough for us
+
+# ToolChains  
