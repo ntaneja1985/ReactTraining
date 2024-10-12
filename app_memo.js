@@ -68,18 +68,32 @@ function CounterSummary({counterData,visibleTab,setVisibleTab}) {
     return counterData
     .filter((x) => x.tab === visibleTab);},[visibleTab])
 
+  const setVisibleTab1 = React.useCallback(() =>{
+    setVisibleTab(1);
+  },[])
+  const setVisibleTab2 = React.useCallback(() =>{
+    setVisibleTab(2);
+  },[])
+
   return (
     <section>
-      <header>
-        <a href="#" onClick={()=>{setVisibleTab(1)}}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
-        <a href="#" onClick={()=>{setVisibleTab(2)}}>Tab 2</a> 
-      </header>
+      <CounterSummaryHeader setVisibleTab1 = {setVisibleTab1} setVisibleTab2 = {setVisibleTab2}/>
       {filteredSortedData.map((counter,index)=>(
         <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
       ))}
     </section>
   );
 }
+
+const CounterSummaryHeader = React.memo(function CounterSummaryHeader({setVisibleTab1,setVisibleTab2}){
+  console.log("Rendering Counter Summary Header")
+  return (
+    <header>
+        <a href="#" onClick={setVisibleTab1}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
+        <a href="#" onClick={setVisibleTab2}>Tab 2</a> 
+      </header>
+  )
+})
 
 const CounterSummaryDetails = React.memo(function CounterSummaryDetails(props)
 {

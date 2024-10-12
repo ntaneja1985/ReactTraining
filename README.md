@@ -2285,3 +2285,108 @@ function CounterSummary({counterData,visibleTab,setVisibleTab}) {
 1. We have seen so far the memoizing the entire results of a functional component(React.memo()) and memoizing the results of a single function inside one of our components(React.useMemo()) but what about memoizing an entire function itself ?
 2. We use useCallback() function
 3. Functions in javascript is just a special kind of object, we are referencing them just by their location in memory
+
+Let's assume we have the following code:
+
+```javascript
+function CounterSummary({counterData,visibleTab,setVisibleTab}) {
+  console.log("Rendering Counter Summary")
+  // const sortedData = [...counterData].sort((a, b) => {
+  //   return b.total - a.total;
+  // });
+  const filteredSortedData = React.useMemo(()=>{
+    console.log("Filtering Data");
+    return counterData
+    .filter((x) => x.tab === visibleTab);},[visibleTab])
+
+  const setVisibleTab1 = () =>{
+    setVisibleTab(1);
+  }
+  const setVisibleTab2 = () =>{
+    setVisibleTab(2);
+  }
+
+  return (
+    <section>
+      <CounterSummaryHeader setVisibleTab1 = {setVisibleTab1} setVisibleTab2 = {setVisibleTab2}/>
+      {filteredSortedData.map((counter,index)=>(
+        <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
+      ))}
+    </section>
+  );
+}
+
+const CounterSummaryHeader = React.memo(function CounterSummaryHeader({setVisibleTab1,setVisibleTab2}){
+  console.log("Rendering Counter Summary Header")
+  return (
+    <header>
+        <a href="#" onClick={setVisibleTab1}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
+        <a href="#" onClick={setVisibleTab2}>Tab 2</a> 
+      </header>
+  )
+})
+
+```
+
+- In the above code we have memoized the CounterSummaryHeader. We expect the CounterSummary header to be re-run again only if its props change. 
+- But please note that functions are first class objects in javascript.
+- Everytime, CounterSummary function is re-run or re-rendered, it generates new setVisibleTab1 and setVisibleTab2 functions and hence creates new objects in memory
+- Since React does only shallow equality i.e compare 2 objects by their location in memory, so Counter Summary Header is run everytime Counter Summary is run since the props have changed(new objects have been created in memory).
+- To fix the above issue, we need to use useCallback
+- useCallback is similar to useMemo as it also calls a mountCallback which accepts a function and list of dependencies we pass to it.
+- The difference here is that useCallback doesnot really run the function, but stores the function as in-state.
+- useMemo just stores the results of the function whereas useCallback stores the function on the hook itself.It will only recreate this function if the dependencies change.
+- By wrapping a function in useCallback() we ensure that Object.is() returns true and previous prop and next prop do match.
+
+```javascript
+function CounterSummary({counterData,visibleTab,setVisibleTab}) {
+  console.log("Rendering Counter Summary")
+  // const sortedData = [...counterData].sort((a, b) => {
+  //   return b.total - a.total;
+  // });
+  const filteredSortedData = React.useMemo(()=>{
+    console.log("Filtering Data");
+    return counterData
+    .filter((x) => x.tab === visibleTab);},[visibleTab])
+
+//By setting empty dependencies we ensure that these functions run only once
+  const setVisibleTab1 = React.useCallback(() =>{
+    setVisibleTab(1);
+  },[])
+  const setVisibleTab2 = React.useCallback(() =>{
+    setVisibleTab(2);
+  },[])
+
+  return (
+    <section>
+      <CounterSummaryHeader setVisibleTab1 = {setVisibleTab1} setVisibleTab2 = {setVisibleTab2}/>
+      {filteredSortedData.map((counter,index)=>(
+        <CounterSummaryDetails key={counter.id} counterName = {counter.name} counterTotal = {counter.total} />
+      ))}
+    </section>
+  );
+}
+
+const CounterSummaryHeader = React.memo(function CounterSummaryHeader({setVisibleTab1,setVisibleTab2}){
+  console.log("Rendering Counter Summary Header")
+  return (
+    <header>
+        <a href="#" onClick={setVisibleTab1}>Tab 1</a> &nbsp;&nbsp; | &nbsp;&nbsp;
+        <a href="#" onClick={setVisibleTab2}>Tab 2</a> 
+      </header>
+  )
+})
+
+```
+- Here we can see that since setVisibleTab1 and setVisibleTab2 are stored inside a callback, we ensure that both of these functions donot change and are not recreated when they are passed to the CounterSummaryHeader functional component.
+- Here the Header is not always re-rendered if CounterSummary is changed or re-run.
+- By wrapping a function in useCallback() we ensure that Object.is() returns true and previous prop and next prop do match.
+
+# React Forget
+- It is a compiler. 
+- It looks at all the React code and what to memo, what to put under useMemo() and what our dependencies should be
+- Keeps track of dependency list
+- What should be memoed?
+- We get our code + memoization
+
+# useContext and Reducer
