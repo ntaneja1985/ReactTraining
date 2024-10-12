@@ -2692,3 +2692,102 @@ console.log(counters);
 - No routing in React
 - Multiple UIs in our application
 - React is a UI library which is used to update the DOM
+
+# Strict Code
+- Helps us to avoid bugs
+- It is about avoiding mistakes
+- Just like Context.Provider are a special type of node in the fiber tree so is the Strict Mode
+- Whenever React finds this node, all its descendants are in strict mode.
+- There is a type of Fiber Node called Strict Node
+
+```javascript
+<React.StrictMode>
+    <App />
+  </React.StrictMode>
+
+```
+# Extra Re-Render
+- Strict Mode does an extra re-render of our components which are under strict mode. Why?
+- Well, its just to find out if our functions are pure or not.
+- Impure functions cause lot of bugs
+- How do we find those bugs . Do we go through each component in our application and test it line by line. 
+- Best option is to use strict mode. Strict Mode will automatically re-render all the components and if there is an impure function, this will become automatically apparent.
+- Strict Mode works only in Development not in Production
+- In Production Strict Mode will not run
+
+```javascript
+//impure function
+const CounterSummaryDetail = memo(function CounterSummaryDetail({ name, total }) {
+    //making the function impure
+    name.shortName = name.shortName + ":"
+
+  return (
+      <p>{name.shortName} ({total})</p>
+  )
+});
+
+//Fixed the impurities, made it a pure function
+const CounterSummaryDetail = memo(function CounterSummaryDetail({ name, total }) {
+    //making the function impure
+    //name.shortName = name.shortName + ":"
+
+    //Fixing it by making a copy of name variable
+    const newShortName = {...name,shortName:name.shortName + ":"}
+
+  return (
+      <p>{newShortName.shortName} ({total})</p>
+  )
+});
+
+```
+
+- In the above, in strict mode immediately we will see output of counter summary detail is A::(0) because we are mutating the state which is passed as props
+- This will immediately be visible as a bug to developers
+
+# Extra Effect Re-Run
+- Its runs effects twice
+- Effects also need to be tested by re-running them again as their dependencies change.
+- It also helps us to find bugs
+- Lets us say we have a useEffect() with a timer like this:
+
+```javascript
+useEffect(()=>{
+    let timerId;
+    let seconds = 0;
+
+    if(counter.tab === visibleTab && counter.name.shortName ==='A')
+    {
+        timerId = setInterval(()=>{
+            seconds++;
+            console.log(`Time since ${counter.name.shortName} was available and/or clicked: ${seconds} `)
+        },1000)
+    }
+  },[counter.total])
+```
+- If the above code runs within strict mode, this effect will be run twice.
+- So, instead of creating one timer, it will create 2 timers at the same time.
+- But remember what we learnt about useEffect(), whenever the useEffect() is run again, it calls the cleanup method of the previous effect() method
+- In the above code, the useEffect doesnot have a cleanup method returning from it.
+- So we need to specify the cleanup method.
+- This can cause lot of tricky issues and React Strict Mode helped us to solve that by making the problem apparent in the beginning itself. Correct code is:
+
+```javascript
+useEffect(()=>{
+    let timerId;
+    let seconds = 0;
+
+    if(counter.tab === visibleTab && counter.name.shortName ==='A')
+    {
+        timerId = setInterval(()=>{
+            seconds++;
+            console.log(`Time since ${counter.name.shortName} was available and/or clicked: ${seconds} `)
+        },1000)
+    }
+    return (()=>{
+        clearInterval(timerId);
+    })
+  },[counter.total])
+
+```
+- So everytime this useEffect, cleanup function of previous effects will be re-run and it will clear the interval started earlier.
+- Strict mode runs the components twice and effects twice and helps us in development
