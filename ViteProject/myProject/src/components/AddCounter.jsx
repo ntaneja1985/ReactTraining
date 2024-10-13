@@ -1,33 +1,49 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
+import { CounterDispatchContext } from '../contexts/context';
 
-function AddCounter() {
-
-  const [counterName,setCounterName] = useState('');
+export function AddCounter() {
+  const counterDispatch = useContext(CounterDispatchContext);
+  const [counterShortName,setCounterShortName] = useState('');
+  const [counterLongName,setCounterLongName] = useState('');
+  const [tab,setTab] = useState(1);
   const [startingValue,setStartingValue] = useState(1);
 
   const handleSubmit = (event) =>{
     event.preventDefault();
-    console.log(counterName);
-    console.log(startingValue);
-    
-    //This returns the DOM element: form
-    const form = event.target;
-    //Something that the browser provides us to work with the data in the form(key-value pairs in the form)
-    const formData = new FormData(form);
-    console.log(...formData);
-    const formJson = Object.fromEntries(formData.entries());
-    console.log(formJson);
+    counterDispatch({type: 'add',
+      data:{
+        shortName: counterShortName,
+        longName: counterLongName,
+        tab: Number(tab),
+        startingValue: Number(startingValue)
+      }
+    })
   }
 
   return (
     <>
         <form method='post' onSubmit={handleSubmit}>
-        <h2>Add Counter</h2>
+        <h2>Add {counterShortName}</h2>
         <p>
-            <label htmlFor='counterName'>Name</label>
-            <input type="text" name="counterName" value={counterName} id="counterName" onChange={(event)=>{
-              setCounterName(event.target.value)
+            <label htmlFor='counterShortName'>Short Name</label>
+            <input type="text" name="counterShortName" value={counterShortName} id="counterShortName" onChange={(event)=>{
+              setCounterShortName(event.target.value)
             }} />
+        </p>
+        <p>
+            <label htmlFor='counterLongName'>Long Name</label>
+            <input type="textarea" name="counterLongName" value={counterLongName} id="counterLongName" onChange={(event)=>{
+              setCounterLongName(event.target.value)
+            }} />
+        </p>
+        <p>
+            <label htmlFor='tab'>Tab</label>
+            <select  name="tab" value={tab} id="tab" onChange={(event)=>{
+              setTab(event.target.value)
+            }}>
+              <option value = "1">1</option>
+              <option value = "2">2</option>
+              </select>
         </p>
         <p>
         <label htmlFor='startingValue'>Starting Value</label>

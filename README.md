@@ -2911,3 +2911,80 @@ const handleSubmit = (event) =>{
 - Note in the above code we have multiple ways by which we can get the formData values
 
 # textArea, select
+
+```javascript
+ <form method='post' onSubmit={handleSubmit}>
+        <h2>Add {counterShortName}</h2>
+        <p>
+            <label htmlFor='counterShortName'>Short Name</label>
+            <input type="text" name="counterShortName" value={counterShortName} id="counterShortName" onChange={(event)=>{
+              setCounterShortName(event.target.value)
+            }} />
+        </p>
+        <p>
+            <label htmlFor='counterLongName'>Long Name</label>
+            <input type="textarea" name="counterLongName" value={counterLongName} id="counterLongName" onChange={(event)=>{
+              setCounterLongName(event.target.value)
+            }} />
+        </p>
+        <p>
+            <label htmlFor='tab'>Tab</label>
+            <select  name="tab" value={tab} id="tab" onChange={(event)=>{
+              setTab(event.target.value)
+            }}>
+              <option value = "1">1</option>
+              <option value = "2">2</option>
+              </select>
+        </p>
+        <p>
+        <label htmlFor='startingValue'>Starting Value</label>
+            <input value={startingValue} name="startingValue" type="number" id="startingValue" onChange={(event)=>{
+              setStartingValue(event.target.value)
+            }} />
+        </p>
+        <button type='submit'>Add</button>
+        </form>
+
+
+//handle Submit code
+const handleSubmit = (event) =>{
+    event.preventDefault();
+    counterDispatch({type: 'add',
+      data:{
+        shortName: counterShortName,
+        longName: counterLongName,
+        tab: Number(tab),
+        startingValue: Number(startingValue)
+      }
+    })
+  }
+
+
+//Changes to counter Reducer
+case 'add':{
+            const newCounter = new CounterObj(counterData[counterData.length - 1].id + 1,{shortName: action.data.shortName,longName:action.data.longName},
+                action.data.tab,action.data.startingValue);
+            return [...counterData,newCounter];
+        }
+
+```
+
+- Use native form controls as much as possible
+- Date Pickers nowadays are quite good
+
+# 3rd Party Forms
+- Other people's code on top of React
+- Deal with validation
+- Formik with Yup
+- React Hook Form (Uses existing HTML Markup, lightweight and has good performance)
+- Has its own custom hook useForm()
+
+# Future Form Features
+- Form Hooks are one of upcoming React features
+- useFormStatus() : Allows us to make updates to the UI based on the status of the form
+- useFormState(): Allows us to manage state inside a form
+- Is the form pending or submitting
+- useFormState helps us to creating and updating state in the form based on actions
+
+
+# React Dev Tools

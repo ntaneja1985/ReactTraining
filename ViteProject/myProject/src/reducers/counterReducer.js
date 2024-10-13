@@ -1,4 +1,4 @@
-
+import { CounterObj } from "../models/counterObj";
 export function counterReducer(counterData, action) {
     switch (action.type) {
         case 'increment': {
@@ -18,6 +18,11 @@ export function counterReducer(counterData, action) {
                     return counter;
                 }
             });
+        }
+        case 'add':{
+            const newCounter = new CounterObj(counterData[counterData.length - 1].id + 1,{shortName: action.data.shortName,longName:action.data.longName},
+                action.data.tab,action.data.startingValue);
+            return [...counterData,newCounter];
         }
         default: {
             throw Error('Unknown action: ' + action.type);
