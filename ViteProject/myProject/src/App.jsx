@@ -22,7 +22,7 @@ function App() {
               <CounterDispatchContext.Provider value={counterDispatch}>
                   <TabContext.Provider value={visibleTab}>
                       <TabDispatchContext.Provider value={tabDispatch}>
-                          <h1>Counters</h1>
+                          <h1 className='header'>Counters</h1>
                           <section>
                             <AddCounter/>
                           </section>

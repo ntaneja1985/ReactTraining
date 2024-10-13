@@ -2988,3 +2988,56 @@ case 'add':{
 
 
 # React Dev Tools
+- We can use React Developer Tools to inspect React components, edit props and state and identify performance problems
+- We have components and profiler tabs
+- Components Tab allows us to see the React Fiber Tree
+- In Profiler Tab we can start recording and we can see which components are taking what time to load and what is the sequence of actions we performed
+- For custom Hooks, if we want to see more debugging information or logs inside the React Developer Tools, use the useDebugValue hook like this:
+
+```javascript
+export function useDocumentTitle(title) {
+    useDebugValue(title)
+    return useEffect(() => {
+        const originalTitle = document.title;
+        document.title = title;
+  
+        return () => {
+            document.title = originalTitle;
+        }
+    }, [title]);
+  }
+
+```
+
+# CSS and Components
+- Whatever we do with React, ultimately we are producing DOM and along with that we may provide CSS
+- Toolchains can help us to work with CSS
+- CSS is called cascading stylesheets because as we cascade down or move down the stylesheet things override each other if they have the same name.
+- The last one referenced wins
+- We can write CSS in JS
+- How can we prevent CSS classnames from collision?
+- Ultimately whatever we see in the browser is one combined unit (DOM elements + CSS)
+- We use CSS Modules for this purpose.
+- We can create a css file with the name Counter.module.css and specify CSS inside it like this
+
+  ```javascript
+    .header {
+    color: blue
+  }
+
+  ```javascript
+- Now we can change our component to use it like this:
+
+```javascript
+import styles from  './CounterList.module.css'
+return (
+        <section>
+            <h2 className={styles.header}>Counters</h2>
+            { counterData.map((counter) => (
+                <Counter counter={counter} key={counter.id} />
+            ))}
+        </section>
+    )
+
+```
+- The toolchain we use will render the h2 tag element with a different name and attach the specified CSS to it imported from the module itself.
