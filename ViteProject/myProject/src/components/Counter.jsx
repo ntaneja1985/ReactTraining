@@ -6,21 +6,21 @@ export function Counter({ counter }) {
     const visibleTab = useContext(TabContext);
     const id = useId();
   
-    useEffect(()=>{
-      let timerId;
-      let seconds = 0;
+    // useEffect(()=>{
+    //   let timerId;
+    //   let seconds = 0;
   
-      if(counter.tab === visibleTab && counter.name.shortName ==='A')
-      {
-          timerId = setInterval(()=>{
-              seconds++;
-              console.log(`Time since ${counter.name.shortName} was available and/or clicked: ${seconds} `)
-          },1000)
-      }
-      return (()=>{
-          clearInterval(timerId);
-      })
-    },[counter.total])
+    //   if(counter.tab === visibleTab && counter.name.shortName ==='A')
+    //   {
+    //       timerId = setInterval(()=>{
+    //           seconds++;
+    //           console.log(`Time since ${counter.name.shortName} was available and/or clicked: ${seconds} `)
+    //       },1000)
+    //   }
+    //   return (()=>{
+    //       clearInterval(timerId);
+    //   })
+    // },[counter.total])
   
     function handleIncrementClick(event) {
         counterDispatch({ type: 'increment', id: counter.id });

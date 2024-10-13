@@ -2867,3 +2867,47 @@ export default UncontrolledForm;
 
 - Vite provides us with source Maps
 - A source Map is a file that maps the transpiled code and the original source code. This allows developers to view and debug the original source code, even though the transpiled code is what is actually running.
+
+# form
+- We can use the form Tag inside components to let React know that it is using a form
+- But when we use a form ,we need to make sure to set the name property of each element that is part of the form
+- This is because, not just the id of the element, but the name of the element is also required by the browser to build the DOM and set values inside it
+
+```javascript
+const handleSubmit = (event) =>{
+    event.preventDefault();
+    console.log(counterName);
+    console.log(startingValue);
+    
+    //This returns the DOM element: form
+    const form = event.target;
+    //Something that the browser provides us to work with the data in the form(key-value pairs in the form)
+    const formData = new FormData(form);
+    console.log(...formData);
+    const formJson = Object.fromEntries(formData.entries());
+    console.log(formJson);
+  }
+
+
+<form method='post' onSubmit={handleSubmit}>
+        <h2>Add Counter</h2>
+        <p>
+            <label htmlFor='counterName'>Name</label>
+            <input type="text" name="counterName" value={counterName} id="counterName" onChange={(event)=>{
+              setCounterName(event.target.value)
+            }} />
+        </p>
+        <p>
+        <label htmlFor='startingValue'>Starting Value</label>
+            <input value={startingValue} name="startingValue" type="number" id="startingValue" onChange={(event)=>{
+              setStartingValue(event.target.value)
+            }} />
+        </p>
+        <button type='submit'>Add</button>
+        </form>
+
+```
+
+- Note in the above code we have multiple ways by which we can get the formData values
+
+# textArea, select
