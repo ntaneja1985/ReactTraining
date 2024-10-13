@@ -2791,3 +2791,6 @@ useEffect(()=>{
 ```
 - So everytime this useEffect, cleanup function of previous effects will be re-run and it will clear the interval started earlier.
 - Strict mode runs the components twice and effects twice and helps us in development
+
+# Forms 
+- 
