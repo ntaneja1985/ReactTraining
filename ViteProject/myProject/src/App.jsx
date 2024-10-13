@@ -6,6 +6,7 @@ import { tabReducer } from './reducers/tabReducer';
 import { CounterContext,CounterDispatchContext,TabContext,TabDispatchContext } from './contexts/context';
 import { CounterList } from './components/CounterList';
 import { CounterTools } from './components/CounterTools';
+import AddCounter from './components/AddCounter';
 function App() {
   const [counterData, counterDispatch] = useReducer(counterReducer, [
       new CounterObj(1,{ longName: 'Counter A', shortName: 'A'}, 1, 0),
@@ -22,6 +23,9 @@ function App() {
                   <TabContext.Provider value={visibleTab}>
                       <TabDispatchContext.Provider value={tabDispatch}>
                           <h1>Counters</h1>
+                          <section>
+                            <AddCounter/>
+                          </section>
                           <section>
                               <CounterList />
                               <CounterTools />

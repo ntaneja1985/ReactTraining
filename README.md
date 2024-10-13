@@ -2793,4 +2793,77 @@ useEffect(()=>{
 - Strict mode runs the components twice and effects twice and helps us in development
 
 # Forms 
-- 
+- Uncontrolled Inputs: 
+- Uncontrolled inputs in React are components where the form data is handled by the DOM itself, rather than being fully controlled by React. Essentially, React doesn't keep track of the state of these inputs, and the data is manipulated directly via the DOM.
+
+```javascript
+import React, { useRef } from 'react';
+
+function UncontrolledForm() {
+  const inputRef = useRef(null);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    alert(`Input Value: ${inputRef.current.value}`);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input type="text" ref={inputRef} />
+      <button type="submit">Submit</button>
+    </form>
+  );
+}
+
+export default UncontrolledForm;
+
+
+```
+
+- Uncontrolled components are handy for simpler use cases or when you need to integrate with non-React code. However, for more complex forms, controlled components are usually preferable, as they allow React to manage the form state, leading to better predictability and more straightforward debugging.
+
+# Controlled Inputs
+- Here state is needed
+- There are specific browser components that accept user input:
+1. <input>
+2. <select>
+3. <textarea>
+- They are special in React because passing the value prop to them makes them ***controlled***
+- If we write the following code and go into the browser:
+```javascript
+  <input type="text" value={counterName} id="counterName" />
+
+```
+- If we go to Chrome and try to change the value of counterName, i would not be able to do so
+- This is because the value of counterName is controlled by React and it can only change if React allows it to change.
+- React simply ignores any events with respect to that property. It says if there is a change event do nothing (checkControlledValueProps)
+- We need to explicitly provide a onChange() handler
+- React gives the following error:
+-  You provided a `value` prop to a form field without an `onChange` handler. This will render a read-only field. If the field should be mutable use `defaultValue`. Otherwise, set either `onChange` or `readOnly`.
+-  We can fix it like this:
+  
+
+  ```javascript
+<input type="text" value={counterName} id="counterName" onChange={(event)=>{
+              setCounterName(event.target.value)
+            }} />
+  ```
+
+- We fire the change event, it updates the state and re-renders the component with the updated value
+- There is a conceptual aside here as well
+- What if we want to make our controlled input as uncontrolled input
+- We can write code like this
+
+```javascript
+ const [counterName,setCounterName] = useState();
+
+  \\ OR
+
+  const [counterName,setCounterName] = useState(undefined);
+```
+
+- In the above, React will be unable to detect the initial state value as it is empty or undefined
+- So it wont be able to track changes to that value, then we can go to the browser and type in whatever we want to in the input textbox field and it will be treated as uncontrolled input
+
+- Vite provides us with source Maps
+- A source Map is a file that maps the transpiled code and the original source code. This allows developers to view and debug the original source code, even though the transpiled code is what is actually running.
