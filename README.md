@@ -3041,3 +3041,50 @@ return (
 
 ```
 - The toolchain we use will render the h2 tag element with a different name and attach the specified CSS to it imported from the module itself.
+
+# Class Project
+- We can temporarily use useEffect() to fetch the data and update state
+- Data is fetched using Fetch API provided by the browser
+- React team itself doesnot recommend using useEffect for this but the framework's built in way of fetching data
+
+```javaScript
+ useEffect(()=>{
+        let results = {};
+        fetch('/api/data.json',{ headers:{
+            "Content-Type": "application/json"
+        }})
+        .then(res=>res.json())
+        .then(data => console.log(data))
+    },[])
+
+```
+
+- Randomly shuffle an array
+
+```JavaScript
+export function Honeycomb({centerLetter,outerLetters,validLetters}){
+    const [randomArray,setRandomArray] = useState([0,1,2,3,4,5]);
+    const shuffle = () =>{
+        let newArray = [...randomArray].sort((()=>Math.random()-0.5));
+        setRandomArray(newArray);
+        console.log(newArray);
+    }
+    return (
+        <>
+        <article className="honeycomb">
+            <Letter letter = {centerLetter} isCenter = {true}></Letter>
+            <Letter letter = {outerLetters[randomArray[0]]} isCenter={false}></Letter>
+            <Letter letter = {outerLetters[randomArray[1]]} isCenter={false}></Letter>
+            <Letter letter = {outerLetters[randomArray[2]]} isCenter={false}></Letter>
+            <Letter letter = {outerLetters[randomArray[3]]} isCenter={false}></Letter>
+            <Letter letter = {outerLetters[randomArray[4]]} isCenter={false}></Letter>
+            <Letter letter = {outerLetters[randomArray[5]]} isCenter={false}></Letter>
+        </article>
+          <section className="buttons">
+          <button className="button" onClick={shuffle}>Shuffle</button>
+      </section>
+      </>
+    )
+}
+```
+
