@@ -3241,3 +3241,59 @@ export function AllCaps() {
 
 
 # RSC Payload
+- Tree Synchronization and Hydration
+- React is a client side UI library
+- People who made React wanted React to run on the server and generate HTML
+- There has to be some way to build a Fiber Tree for the DOM generated on the server
+- Framework has to give React information to build the Fiber Tree
+- This is called RSC Payload
+- Frameworks not just deliver DOM but also a Fiber Tree
+- Fiber tree lives on the client
+- Next JS generates certain arrays during Server Rendering in order to build the fiber tree on the client tree
+- These arrays are explicitly sent to React to generate Fiber Tree
+- Server components deliver 2 things: HTML(to build the DOM tree) + RSC Payload(for Fiber tree to be built)
+- ***This is also a caveat, if we generate lot of svg(static) content using server components, then we will be sending them twice over.***
+- One for building DOM tree and other for building Fiber Tree
+- This will consume greater bandwidth
+- Hydration: Make the page work: build the DOM tree and the fiber tree.
+
+## Composing Client Components and Server Components
+- Mix and Match
+- We cannot import a server component into a client component(one which uses 'use Client')
+- We can import a client component into a server component, but not vice versa
+- So how do we use a server component inside a client component? 
+- Well, make it a child of the client component
+  
+```JavaScript
+ <main className={styles.main}>
+          <h1>My Courses</h1>
+          <AllCaps>
+          <Courses/>
+            </AllCaps>
+          
+        </main>
+
+        export function AllCaps({children}) {
+    const [isAllCaps,setIsAllCaps] = useState(false);
+    console.log(children)
+  return (
+    <article>
+        <label htmlFor='allCaps'>All Caps?</label>
+        <input type="checkbox" id="allcaps" onClick={(event) => setIsAllCaps(event.target.checked)}/>
+        <section className={isAllCaps ? "allcaps":""}>
+          {children}
+        </section>
+    </article>
+  )
+}
+
+
+
+```
+
+- The above is easy to implement and understand
+- Courses is a server component and AllCaps is a client component
+- Courses component will return a DOM and a payload
+- AllCaps will start building the fiber tree and we just have to attach the fiber code sent by React Server Component with that particular fiber tree
+- Basic idea is to pass server components as children props to the client component
+- How to decide where to use client components and where to use server components depends on the specific requirement of the application.

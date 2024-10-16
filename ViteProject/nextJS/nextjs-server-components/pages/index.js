@@ -21,8 +21,10 @@ export default function Home() {
     <>
         <main className={styles.main}>
           <h1>My Courses</h1>
-          <AllCaps/>
+          <AllCaps>
           <Courses/>
+            </AllCaps>
+          
         </main>
     </>
   );
