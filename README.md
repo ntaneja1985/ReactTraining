@@ -1050,6 +1050,8 @@ React.useEffect(()=>{
 - In the above code, the function we provide inside useEffect is to create and the function we return is to destroy. The function we give inside useEffect is run after our function has executed if there are no dependencies or if we specify dependencies. 
 - The function we return from is run on destroy of component or when it is unmounted.
 
+![alt text](image-12.png)
+
 # Fetching Data
 - We need to fetch data from external sources in React
 - The act of fetching data is actually a side-effect in essence. Its something outside of our component that we want to go to.
