@@ -3088,3 +3088,46 @@ export function Honeycomb({centerLetter,outerLetters,validLetters}){
 }
 ```
 
+# Meta Frameworks
+
+## Next JS
+
+- Very popular Framework
+- Has Data Fetching Support
+- Render React UI on the Server and send final HTML to browser
+- Routing: Generate Pages and can have multiple pages, adjust URL in browser and pull up a new set of components
+- Framework is built on top of React
+- Has its own set of custom Hooks
+
+## Remix
+- Focused on web-standards
+- Has Nested Routes (like Next JS)
+- Easier Data Loading
+- Custom Hooks  
+
+# Suspense
+- Used by other frameworks
+- Built into the source code of React
+- Remember when we load data using async, await, we put in a ternary operator and show the data only if it is available otherwise we show: Loading...
+- Suspense helps us to achieve the above in a much simpler way, resuming work later
+- React provides a special kind of node in the tree called Suspense Boundary
+- Boundary: A node in the tree
+
+![alt text](image-11.png)
+
+- Suspense lets you display a fallback until all of its children have finished loading
+
+```javascript
+<Suspense fallback = {<Loading />}>
+  <SomeComponent/>
+<Suspense>
+
+```
+- Here fallback is some JSX
+- ***Only Suspense-enabled data sources will activate the suspense component***
+- These include
+1. Data fetching with Suspense enabled frameworks like Relay and Next JS
+2. Lazy Loading component code with lazy
+3. Reading the value of a promise with use
+
+***Suspense doesnot detect when data is fetched inside an effect() or an event handler***
