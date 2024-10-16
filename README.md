@@ -3156,3 +3156,58 @@ export function Honeycomb({centerLetter,outerLetters,validLetters}){
 
 
 # React Server Components
+- They require a framework
+- They involve running the components on the server instead of client
+- React server components is react's effort at being good at performance and bailing out of re-renders
+- Most React apps run on the client: browser or mobile phone using the Javascript Engine
+- However before that we used to have server apps(ASP.NET) which used to run everything on the server and just send HTML to the client
+- React decided that the way to improve performance was to run some components on the server and some components to run on the client
+- React Server components involve running React Javascript engine to run both on the client and the server.
+- React Components that run on the server are called React Server components
+- We can pre-build the components and send the output.
+- In React Server components we generate HTML + payload
+- Server components when executed deliver HTML and payload
+- React does reconciliation against the DOM generated from HTML and HTML generated from client side.
+
+## Server components with Next JS
+- If we create a nextJS app, and create React components inside and run it, then nextJS runs our react components as server components by default
+
+```javascript
+export default function Home() {
+  return (
+    <>
+        <main className={styles.main}>
+          <h1>My Courses</h1>
+          <Courses/>
+        </main>
+    </>
+  );
+}
+
+export function Courses() {
+    const data = ["Understanding React","Understanding HTML","Javascript: The weird parts"];
+    return (
+        <ul>
+            {data.map((c,index)=> <li key={index}>{c}</li>)}
+        </ul>
+    )
+}
+
+
+```
+- If we go to Network Tab and inspect what was delivered to the webpage, it is the entire HTML not component code, because nextJS runs our components as server components by default
+
+## Major limitation of server components
+- Since only HTML is delivered by Server components, where does State live?
+- We know State lives on the Fiber Tree, but there is no reconciliation to be done here, so where do we store state
+- We have to store state per user on their machine.
+- Server components have a limitation that they cannot do hooks like useState(), useReducer() coz there is no fiber tree and hence no state
+- Server components cannot be used for stateful interactions
+- Server components are useful for areas of DOM tree that dont need stateful interaction like list of courses above (which is just text)
+- Server components are faster
+- Server components can also fetch data much faster(no need for fetch API)
+- async and await can be done on server components in a more efficient way
+- Anything tied to hooks cannot be done on server components
+- Since nextJS runs all components as server components, how do we indicate to it to run a certain component on the client only and not on the server?
+
+## Client Components and 'use Client'
