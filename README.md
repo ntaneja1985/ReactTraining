@@ -2827,9 +2827,9 @@ export default UncontrolledForm;
 # Controlled Inputs
 - Here state is needed
 - There are specific browser components that accept user input:
-1. <input>
-2. <select>
-3. <textarea>
+1. input
+2. select
+3. textarea
 - They are special in React because passing the value prop to them makes them ***controlled***
 - If we write the following code and go into the browser:
 ```javascript
