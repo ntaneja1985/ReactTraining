@@ -3,6 +3,7 @@ import Image from "next/image";
 import localFont from "next/font/local";
 import styles from "@/styles/Home.module.css";
 import { Courses } from "./components/courses";
+import { AllCaps } from "./components/allcaps";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -18,9 +19,9 @@ const geistMono = localFont({
 export default function Home() {
   return (
     <>
-      
         <main className={styles.main}>
           <h1>My Courses</h1>
+          <AllCaps/>
           <Courses/>
         </main>
     </>

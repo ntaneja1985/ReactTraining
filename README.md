@@ -3211,3 +3211,33 @@ export function Courses() {
 - Since nextJS runs all components as server components, how do we indicate to it to run a certain component on the client only and not on the server?
 
 ## Client Components and 'use Client'
+- We can use the 'use Client' keyword when we want components to be rendered on the client
+- We can safely assume that these components will have some hooks like useState
+- Even in these client side components, the next JS compiler does what it can with respect to the amount of HTML it can send to the client
+  
+```JavaScript
+"use client";
+import React, { useState } from 'react'
+
+export function AllCaps() {
+    const [isAllCaps,setIsAllCaps] = useState(false);
+  return (
+    <article>
+        <label htmlFor='allCaps'>All Caps?</label>
+        <input type="checkbox" id="allcaps" onClick={(event) => setIsAllCaps(event.target.checked)}/>
+        <section className={isAllCaps ? "allcaps":""}>
+
+        </section>
+    </article>
+  )
+}
+
+
+```
+
+- We should aim to have our client components as lower down the tree as possible to take full advantage of server side components
+- ***Please note that once we use 'use Client' in any component,  any other sub-components within this component will also become client-side components***
+- But then a question arises, how does React do reconciliation in this case with some of the HTML being generated client side and some HTML coming directly from the server?
+
+
+# RSC Payload
