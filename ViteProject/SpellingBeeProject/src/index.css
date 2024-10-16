@@ -29,6 +29,19 @@ body {
   margin: 25px auto;
 }
 
+.score {
+  font-weight: bold;
+}
+
+.correctGuesses {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px auto 8px auto;
+  border: solid 1px #ccc;
+  padding: 4px 16px;
+}
+
 .honeycomb {
   position: relative;
   height: 275px;
@@ -45,6 +58,14 @@ body {
   text-transform: uppercase;
   letter-spacing: 3px;
   font-size: 2rem;
+}
+
+.guess-outer {
+  color: #444
+}
+
+.guess-center {
+  color: #f7da21
 }
 
 
@@ -91,6 +112,7 @@ body {
   text-transform: uppercase;
   pointer-events: none;
 }
+
 
 .center-letter .cell-fill {
   cursor: pointer;
