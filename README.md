@@ -3130,4 +3130,29 @@ export function Honeycomb({centerLetter,outerLetters,validLetters}){
 2. Lazy Loading component code with lazy
 3. Reading the value of a promise with use
 
+```javascript
+<main className="flex h-screen items-center justify-center">
+      <header>
+        <h1>Nishant's relatives: </h1>
+      </header>
+      <Suspense fallback = {<ul><li>Loading Relatives...</li></ul>}>
+      <Await resolve={relatives}>
+        {(rltvs) =><p> <ul>{rltvs.map((rltv,index)=>
+          <li key={index}>{rltv} </li>
+        )}</ul></p>}
+      </Await>
+      </Suspense>
+     
+    </main>
+
+```
+
+- We know that React does Reconciliation of the Fiber Tree
+- In the above code, suspense is a special type of node which will display Loading Relatives first in a branch of the fiber tree
+- When the promise is resolved, Suspense will start pointing to the resolved branch provided by Await
+- Its actually quite simple if we simply understand how reconciliation process takes place.
+
 ***Suspense doesnot detect when data is fetched inside an effect() or an event handler***
+
+
+# React Server Components
